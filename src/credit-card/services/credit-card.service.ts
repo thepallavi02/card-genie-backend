@@ -244,7 +244,12 @@ export class CreditCardService {
 
             // Get all available credit cards
             const availableCards = await this.creditCardAnalysisModel.find(
-                {},
+                {"isActive":true},
+                {cardName:1,rewardSummary: 1, _id: 0},
+            ).limit(50).lean();
+
+            const currentEarningCard = await this.creditCardAnalysisModel.find(
+                {"cardName":{"$in":request.cardName}},
                 {cardName:1,rewardSummary: 1, _id: 0},
             ).limit(50).lean();
 
@@ -253,18 +258,36 @@ export class CreditCardService {
                 JSON.stringify(availableCards),
             );
 
-            const answer = await this.geminiService.recommendationWithGroq(prompt);
+            const cuurentEarningPompt = this.geminiService.getRecommendationPrompt(
+                JSON.stringify(userPersona),
+                JSON.stringify(currentEarningCard),
+            );
+
+            let [answer,currentEarning] = await Promise.all([
+                await this.geminiService.recommendationWithGroq(prompt),
+                await this.geminiService.recommendationWithGroq(cuurentEarningPompt),
+            ])
             const result = []
+            let currentEarningAmount = 0;
+            if(currentEarning && currentEarning['topRecommendations']){
+                for(const item of currentEarning['topRecommendations']){
+                    if(!isNaN(Number(item['totalReturn']))){
+                        currentEarningAmount = currentEarningAmount + Number(item['totalReturn']);
+                    }
+                }
+            }
             if(answer && answer['topRecommendations']){
+                currentEarningAmount = currentEarningAmount/(answer['topRecommendations'].length)
                 for(const item of answer['topRecommendations']){
                     let cardName = item['cardName'];
                     const availableCards = await this.creditCardAnalysisModel.findOne(
                         {cardName:cardName},
                     ).lean();
-                    item['eligibilityCriteria'] = availableCards.eligibilityCriteria;
-                    item['rewardSummary'] = availableCards.rewardSummary;
-                    item['feeStructure'] = availableCards.feeStructure;
-                    item['benefits'] = availableCards.benefits;
+                    item['eligibilityCriteria'] = availableCards?.eligibilityCriteria;
+                    item['rewardSummary'] = availableCards?.rewardSummary;
+                    item['feeStructure'] = availableCards?.feeStructure;
+                    item['benefits'] = availableCards?.benefits;
+                    item['currentReturn'] = Number(currentEarningAmount.toFixed(2));
                     result.push(item);
 
                 }

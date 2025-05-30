@@ -45,6 +45,9 @@ export class CreditCardAnalysis {
     fuelSurchargeWaiver: string;
     others: string;
   }
+
+  @Prop()
+  isActive: boolean;
 }
 
 export const CreditCardAnalysisSchema =

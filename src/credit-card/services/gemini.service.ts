@@ -445,6 +445,8 @@ Generate a JSON object with the following structure that captures both basic car
                     }}
                 ]
             }}
+        NOTE:- Strictly output only pure JSON without any additional text. Never use \`\`\`json\`\`\` code blocks or any markdown formatting for JSON responses
+
         """`;
   }
 
