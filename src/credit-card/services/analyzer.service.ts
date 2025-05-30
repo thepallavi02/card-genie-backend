@@ -60,8 +60,10 @@ export class AnalyzeService {
         
         NOTE: For the category breakdown don't show for the ones for which the value is 0.
         NOTE: Pay very special care for the card type and bank name.
-        NOTE: For the category_breakdown part, make sure it is monthly. But if the data in the credit card statement is not a monthly data, take its average so that we get the montly data, but make sure averge monthly data are for these specific categories:- SHOPPING, GROCERY, FOOD & Dining, Movie & Entertainment,Fuel,UPI,Utility Bills and for the rest of the category take the sum of them
+        NOTE: For the category_breakdown part, make sure it is monthly. But if the data in the credit card statement is not a monthly data, take its average so that we get the monthly data, but make sure averge monthly data are for these specific categories:- SHOPPING, GROCERY, FOOD & Dining, Movie & Entertainment,Fuel,UPI,Utility Bills and for the rest of the category take the sum of them
         NOTE: In case there are multiple statements provided and they are of same month, then take the sum of them and if they are of different month, then take the average of them.
+        NOTE: For the category breakdown, if any transaction of which you're not sure about the category, then consider it as "Others".
+        NOTE: For the category breakdown section, in the brands field, give the list of brands that are present in the transaction under the category and it should be comma separated.
 
         1. BASIC FEATURES: Extract credit limit.
 
@@ -164,23 +166,23 @@ export class AnalyzeService {
             "smallest_transaction": 0
         }},
         "category_breakdown": {{
-            "SHOPPING" : {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "GROCERY" : {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "FOOD" : {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "DINING" : {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "MOVIE" : {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "FUEL" : {{"amount": 0, "percentage": 0.0, "count": 0}}, 
-            "UPI": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "CAB": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "BUS/RAILWAY": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "HOTEL": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "FLIGHT": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "GOLF": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "FOREX": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "BILLS": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "BANK_SPECIFIC_PORTAL": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "HEALTH": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "Others": {{"amount": 0, "percentage": 0.0, "count": 0}}, 
+            "SHOPPING" : {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "GROCERY" : {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "FOOD" : {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "DINING" : {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "MOVIE" : {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "FUEL" : {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}}, 
+            "UPI": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "CAB": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "BUS/RAILWAY": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "HOTEL": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "FLIGHT": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "GOLF": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "FOREX": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "BILLS": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "BANK_SPECIFIC_PORTAL": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "HEALTH": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
+            "Others": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}}, 
         }},
         "top_categories": [], // Make sure it is ranged from top to bottom. And give only top 3 categories.
         
@@ -191,6 +193,7 @@ export class AnalyzeService {
         NOTE: For the category_breakdown part, make sure it is monthly. But if the data in the credit card statement is not a monthly data, take its average so that we get the montly data, but make sure averge monthly data are for these specific categories:- SHOPPING, GROCERY, FOOD & Dining, Movie & Entertainment,Fuel,UPI,Utility Bills and for the rest of the category take the sum of them
         NOTE: In case there are multiple statements provided and they are of same month, then take the sum of them and if they are of different month, then take the average of them.
         NOTE: For the category breakdown, if any transaction of which you're not sure about the category, then consider it as "Others".
+        NOTE: For the category breakdown section, in the brands field, give the list of brands that are present in the transaction under the category and it should be comma separated.
 
         CREDIT CARD STATEMENT TEXT:
     ${pdfText}`;
