@@ -31,8 +31,28 @@ export class StatementAnalyzerService {
         throw new Error(`Document with ID ${documentId} not found`);
       }
 
-      // Extract text from the PDF file
-      const pdfText = await this.extractTextFromPdf(document.filePath);
+      // Extract text from all PDF files and combine them
+      let combinedPdfText = '';
+
+      if (!document.filePaths || document.filePaths.length === 0) {
+        throw new Error('No PDF files found for this document');
+      }
+
+      for (const filePath of document.filePaths) {
+        try {
+          const pdfText = await this.extractTextFromPdf(filePath);
+          combinedPdfText += pdfText + '\n\n--- NEW DOCUMENT ---\n\n';
+        } catch (error) {
+          this.logger.error(`Error extracting text from PDF ${filePath}: ${error.message}`);
+        }
+      }
+
+      if (!combinedPdfText) {
+        throw new Error('Failed to extract text from any of the uploaded PDFs');
+      }
+
+      // Analyze the combined text
+      const pdfText = combinedPdfText;
 
       // Analyze the text using Groq API
       const analysisResult = await this.analyzeWithGroq(pdfText);
@@ -64,16 +84,16 @@ export class StatementAnalyzerService {
   private async extractTextFromPdf(filePath: string): Promise<string> {
     try {
       this.logger.log(`Extracting text from PDF: ${filePath}`);
-      
+
       // In a real implementation, we would use a PDF parsing library like pdf-parse
       // For now, we'll simulate the extraction by returning a placeholder text
       // This would be replaced with actual PDF parsing code in a production environment
-      
+
       // Check if the file exists
       if (!fs.existsSync(filePath)) {
         throw new Error(`PDF file not found: ${filePath}`);
       }
-      
+
       // Simulate text extraction
       return `--- Page 1 ---
 Statement Date: 2023-05-15
@@ -118,14 +138,14 @@ Date        Description                 Amount
   private async analyzeWithGroq(pdfText: string): Promise<AnalyzeStatementResponseDto> {
     try {
       this.logger.log(`Analyzing text with Groq API`);
-      
+
       // In a real implementation, we would use the Groq API client to send the text for analysis
       // For now, we'll simulate the analysis by returning a placeholder response
       // This would be replaced with actual API calls in a production environment
-      
+
       // Generate the prompt for the Groq API
       const prompt = this.getExtractionPrompt(pdfText);
-      
+
       // Simulate API response
       return {
         basicFeatures: {

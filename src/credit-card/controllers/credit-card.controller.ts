@@ -37,7 +37,7 @@ export class CreditCardController {
 
   @Post('recommendation')
   @UseInterceptors(
-    FileInterceptor('file', {
+    FilesInterceptor('files', 5, {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, cb) => {
@@ -60,7 +60,7 @@ export class CreditCardController {
     }),
   )
   async getRecommendationByDoc(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFiles() files: Express.Multer.File[],
     @Body() uploadDocDto: UploadDocRequestDto,
     @Headers('authorization') authorization: string,
   ): Promise<UploadDocResponseDto> {
@@ -79,29 +79,56 @@ export class CreditCardController {
       throw new BadRequestException('customerId is required. Please include the customerId from the authentication response.');
     }
 
-    if (!file) {
-      throw new BadRequestException('No PDF file uploaded');
+    if (!files || files.length === 0) {
+      throw new BadRequestException('No PDF files uploaded');
     }
 
-    // Upload document to database
+    if (files.length > 5) {
+      throw new BadRequestException('Maximum 5 PDF files can be uploaded at once');
+    }
+
+    // Upload documents to database
     const uploadResult = await this.creditCardService.uploadDoc(
-      [file],
+      files,
       uploadDocDto.cardBank || 'Unknown',
       uploadDocDto.cardName || 'Unknown',
       customerId
     );
 
     const documentId = uploadResult.documentIds[0];
-    this.logger.log(`Document uploaded with ID: ${documentId}`);
+    this.logger.log(`Documents uploaded with ID: ${documentId}`);
 
-    const fileBuffer = fs.readFileSync(file.path);
-    if (!fileBuffer) {
-      this.logger.error('Failed to read file from disk');
-      throw new BadRequestException('Failed to read file from disk');
+    // Process all PDF files and combine their text
+    let combinedText = '';
+
+
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
+      const fileBuffer = fs.readFileSync(file.path);
+      if (!fileBuffer) {
+        this.logger.error(`Failed to read file from disk: ${file.path}`);
+        continue;
+      }
+
+      try {
+        const pdfText = await this.analyzer.extractTextFromPdf(fileBuffer);
+        combinedText +=`\\n\\n=== CREDIT CARD STATEMENT ${i+1} ===\\n` ;
+        combinedText += `Source: ${file.path}\\n`;
+        combinedText += `${pdfText}\n`;
+        combinedText += `=== END OF STATEMENT ${i+1} ===\\n\\n`;
+      } catch (error) {
+        this.logger.error(`Error extracting text from PDF ${file.path}: ${error.message}`);
+      }
+
+      // Clean up the file after processing
+      fs.unlinkSync(file.path);
     }
 
-    const pdfText = await this.analyzer.extractTextFromPdf(fileBuffer);
-    const prompt = this.analyzer.getExtractionPrompt(pdfText);
+    if (!combinedText) {
+      throw new BadRequestException('Failed to extract text from any of the uploaded PDFs');
+    }
+
+    const prompt = this.analyzer.getExtractionPrompt(combinedText);
     const response = await this.analyzer.analyzeWithGroq(prompt);
 
     // Clean and validate the response
@@ -116,7 +143,6 @@ export class CreditCardController {
       // Continue even if saving fails, to ensure the user gets a response
     }
 
-    fs.unlinkSync(file.path);
     return cleanedResponse;
   }
 

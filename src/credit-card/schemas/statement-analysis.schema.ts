@@ -11,38 +11,38 @@ export class BasicFeatures {
   @Prop({ required: true, default: 0 })
   creditLimit: number;
 
-  @Prop({ required: true, default: 0 })
-  availableCredit: number;
-
-  @Prop({ required: true, default: 0 })
-  cashLimit: number;
-
-  @Prop({ required: true, default: 0 })
-  availableCash: number;
-
-  @Prop({ required: true, default: 0 })
-  creditUtilizationRatio: number;
-
-  @Prop({ required: true, default: 0 })
-  totalAmountDue: number;
-
-  @Prop({ required: true, default: 0 })
-  minimumAmountDue: number;
-
-  @Prop({ required: true, default: 0 })
-  rewardPoints: number;
-
-  @Prop({ required: true, default: '' })
-  bankName: string;
-
-  @Prop({ required: true, default: '' })
-  cardType: string;
-
-  @Prop({ required: true, default: '' })
-  statementDate: string;
-
-  @Prop({ required: true, default: '' })
-  paymentDueDate: string;
+  // @Prop({ required: true, default: 0 })
+  // availableCredit: number;
+  //
+  // @Prop({ required: true, default: 0 })
+  // cashLimit: number;
+  //
+  // @Prop({ required: true, default: 0 })
+  // availableCash: number;
+  //
+  // @Prop({ required: true, default: 0 })
+  // creditUtilizationRatio: number;
+  //
+  // @Prop({ required: true, default: 0 })
+  // totalAmountDue: number;
+  //
+  // @Prop({ required: true, default: 0 })
+  // minimumAmountDue: number;
+  //
+  // @Prop({ required: true, default: 0 })
+  // rewardPoints: number;
+  //
+  // @Prop({ required: true, default: '' })
+  // bankName: string;
+  //
+  // @Prop({ required: true, default: '' })
+  // cardType: string;
+  //
+  // @Prop({ required: true, default: '' })
+  // statementDate: string;
+  //
+  // @Prop({ required: true, default: '' })
+  // paymentDueDate: string;
 }
 
 @Schema()
@@ -152,23 +152,23 @@ export class StatementAnalysis {
   @Prop({ type: BasicFeatures, required: true })
   basicFeatures: BasicFeatures;
 
-  @Prop({ type: TransactionMetrics, required: true })
+  @Prop({ type: TransactionMetrics })
   transactionMetrics: TransactionMetrics;
 
-  @Prop({ type: mongoose.Schema.Types.Mixed, required: true })
+  @Prop({ type: mongoose.Schema.Types.Mixed  })
   categoryBreakdown: Record<string, CategoryDetail>;
 
-  @Prop({ type: [TransactionSchema], required: true })
-  transactions: Transaction[];
+  // @Prop({ type: [TransactionSchema], required: true })
+  // transactions: Transaction[];
 
   @Prop({ type: [String], required: true })
   topCategories: string[];
 
-  @Prop({ type: UserPersonaIndicators, required: true })
-  userPersonaIndicators: UserPersonaIndicators;
+  // @Prop({ type: UserPersonaIndicators, required: true })
+  // userPersonaIndicators: UserPersonaIndicators;
 
-  @Prop({ type: FinancialBehavior, required: true })
-  financialBehavior: FinancialBehavior;
+  // @Prop({ type: FinancialBehavior, required: true })
+  // financialBehavior: FinancialBehavior;
 
   @Prop({ required: true, default: Date.now })
   analyzedAt: Date;

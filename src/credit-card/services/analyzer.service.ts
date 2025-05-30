@@ -57,109 +57,104 @@ export class AnalyzeService {
     return `You are a credit card statement analysis expert. Extract comprehensive features from the following credit card statement and return data in the exact JSON format specified below.
 
         EXTRACTION INSTRUCTIONS:
+        
+        NOTE: For the category breakdown don't show for the ones for which the value is 0.
+        NOTE: Pay very special care for the card type and bank name.
+        NOTE: For the category_breakdown part, make sure it is monthly. But if the data in the credit card statement is not a monthly data, take its average so that we get the montly data, but make sure averge monthly data are for these specific categories:- SHOPPING, GROCERY, FOOD & Dining, Movie & Entertainment,Fuel,UPI,Utility Bills and for the rest of the category take the sum of them
+        NOTE: In case there are multiple statements provided and they are of same month, then take the sum of them and if they are of different month, then take the average of them.
 
-        1. BASIC FEATURES: Extract credit limit, available credit, cash limit, outstanding amounts, reward points, bank name, card type, and dates from the statement header/summary section.
+        1. BASIC FEATURES: Extract credit limit.
 
         2. TRANSACTION ANALYSIS: Analyze all debit transactions (ignore credits, payments, refunds) and categorize them.
 
         3. COMPREHENSIVE CATEGORIZATION RULES:
             CAB:
-            - Keywords: uber, ola, meru, rapido, bluesmart, cab, taxi, auto
+            - Where you kind keywords similar to: uber, ola, meru, rapido, bluesmart, cab, taxi, auto
 
             HOTEL:
-            - Keywords: oyo, treebo, fabhotels, lemon tree, taj hotels, itc hotels, trident, hotel
+            - Where you kind keywords similar to: oyo, treebo, fabhotels, lemon tree, taj hotels, itc hotels, trident, hotel
             - Hotel Chains: hyatt, westin, rosette, ramada, taj, itc, marriott, radisson, sheraton, novotel, lemontree, holiday inn, park plaza, hilton, fairfield, jw marriott, vivanta, the leela, the oberoi, four seasons, pullman, doubletree, renaissance, aloft, st regis, ibis, crowne plaza, intercontinental, best western, comfort inn, days inn, la quinta, embassy suites, hampton inn, courtyard, residence inn, springhill suites, homewood suites, extended stay, candlewood suites
 
-            TRAVEL:
-            - Aggregators: makemytrip, mmt, goibibo, cleartrip, easemytrip, ixigo, tripfactory, yatra, expedia, booking.com, agoda, trivago
-            - Airlines: air india, airindia, indigo, vistara, akasa air, spicejet, goair, go first, jet airways, alliance air, trujet, air asia, emirates, qatar airways, lufthansa, british airways, singapore airlines, thai airways, cathay pacific, etihad, air france, klm, swiss, turkish airlines
-            - Bus/Train: irctc, redbus, abhibus, rail yatri, intrcity, apsrtc, ktc, ksrtc, msrtc, gsrtc, upsrtc, rsrtc, himachal roadways, punjab roadways, volvo, scania, mercedes
+            FLIGHT:
+            - Where you kind keywords similar to: makemytrip, mmt, goibibo, cleartrip, easemytrip, ixigo, tripfactory, yatra, expedia, booking.com, agoda, trivago
+            - Where you kind keywords similar to: air india, airindia, indigo, vistara, akasa air, spicejet, goair, go first, jet airways, alliance air, trujet, air asia, emirates, qatar airways, lufthansa, british airways, singapore airlines, thai airways, cathay pacific, etihad, air france, klm, swiss, turkish airlines
+            
+            
+            BUS/RAILWAY:
+            - Where you kind keywords similar to: irctc, redbus, abhibus, rail yatri, intrcity, apsrtc, ktc, ksrtc, msrtc, gsrtc, upsrtc, rsrtc, himachal roadways, punjab roadways, volvo, scania, mercedes
 
             SHOPPING:
-            - E-commerce: amazon, amzn, amazon pay, flipkart, fkrt, ekart, meesho, fashnear, nykaa, fsn e-commerce ventures, fsnecommerceventures, myntra, ajio, tatacliq, tata cliq, snapdeal, paytm mall, shopclues, limeroad, koovs, jabong, voonik
-            - Fashion & Beauty: mamaearth, honasa consumer, mcaffeine, pep technologies, wow, fit&glow, beardo, zodica lifestyle, plum, pureplay skin sciences, bombay shaving, bombay shaving company, purplle, zivame, clovia, prettysecrets, biba, w for woman, global desi, aurelia, rangmanch
-            - Kids: firstcry, brainbees solutions, hopscotch, babyoye, momspresso
-            - Electronics: reliance digital, reliance retail, digital store, croma, infiniti retail, vijay sales, boat, imagine marketing, oneplus, xiaomi, samsung, apple, lg, sony, dell, hp, lenovo, asus, acer, canon, nikon
-            - Fashion Retail: pantaloons, abfrl, aditya birla fashion, max fashion, lifestyle, landmark group, shoppers stop, central, westside, brand factory, reliance trends, v-mart, big bazaar
-            - Home & Furniture: urban ladder, urbanladder.com, pepperfry, trendsutra, fabfurnish, hometown, nilkamal, godrej interio, durian, evok, damro
-            - Footwear: redtape, mirza international, campus, campus activewear, bata, bata india, liberty, action, relaxo, paragon, khadims, metro
+            - Where you kind keywords similar to: Amazon(amazon, amzn, amazon pay), Flipkart(flipkart, fkrt, ekart), Meesho(meesho, fashnear), Nykaa(nykaa, fsn e-commerce ventures, fsnecommerceventures), Myntra, Ajio, Tata CLiQ (tatacliq, tata cliq), snapdeal, paytm mall, shopclues, limeroad, koovs, jabong, voonik
+            - Where you kind keywords similar to: Mamaearth (mamaearth, honasa consumer), Mcaffeine (mcaffeine, pep technologies), WOW Skin Science (wow, fit&glow), Beardo (beardo, zodica lifestyle), Plum (plum, pureplay skin sciences), Bombay Shaving Co (bombay shaving, bombay shaving company), purplle, zivame, clovia, prettysecrets, biba, w for woman, global desi, aurelia, rangmanch
+            - Where you kind keywords similar to: FirstCry (firstcry, brainbees solutions), hopscotch, babyoye, momspresso
+            - Where you kind keywords similar to: Reliance Digital (reliance digital, reliance retail, digital store), Croma (croma, infiniti retail), vijay sales, Boat (boat, imagine marketing), oneplus, xiaomi, samsung, apple, lg, sony, dell, hp, lenovo, asus, acer, canon, nikon
+            - Where you kind keywords similar to: Pantaloons (pantaloons, abfrl, aditya birla fashion), Max/Lifestyle (max fashion, lifestyle, landmark group), shoppers stop, central, westside, brand factory, reliance trends, v-mart, big bazaar
+            - Where you kind keywords similar to: urban ladder, urbanladder.com, Pepperfry (pepperfry, trendsutra), fabfurnish, hometown, nilkamal, godrej interio, durian, evok, damro
+            - Where you kind keywords similar to: RedTape (redtape, mirza international), Campus (campus, campus activewear), Bata (bata, bata india), liberty, action, relaxo, paragon, khadims, metro
+            
+            GOLF:
+            - Where you kind keywords similar to: golf, golf club, golf course, green fee, tee time, driving range, caddie, golf range, golf booking
+            - Where you kind keywords similar to: Delhi Golf Club, DLF Golf, KGA (Karnataka Golf Association), BPGC (Bombay Presidency Golf Club), Eagleton Golf, Qutab Golf Course, Jaypee Greens Golf, Willow Woods Golf, Prestige Golfshire, Oxford Golf Resort
+            - Where you kind keywords similar to: TeeTime, GolfLan, GolfNow, BookMyGolf, Golftripz, PlayMoreGolf, India Golf Services, GolfNext
 
             DINING:
-            - Platforms: eazydiner, zomato dine, swiggy dineout, dineout, magicpin
-            - Chains: jubilant foodworks, barbeque nation, bikanervala, haldiram, dominos, pizza hut, kfc, mcdonalds, burger king, cafe coffee day, ccd, starbucks, costa coffee, barista, wow momo, behrouz biryani, faasos, freshmenu, mojo pizza, pizza express, papa johns, subway, taco bell, dunkin donuts, baskin robbins, naturals ice cream
-            - Pattern Matching: cafe, bistro, lounge, brewery, grill, bar, restro, social, kitchen, taproom, pub, canteen, restaurant, dhaba, eatery, food court
+            - Where you kind keywords similar to: eazydiner, zomato dine, swiggy dineout, dineout, magicpin
+            - Where you kind keywords similar to: jubilant foodworks, barbeque nation, bikanervala, haldiram, dominos, pizza hut, kfc, mcdonalds, burger king, cafe coffee day, ccd, starbucks, costa coffee, barista, wow momo, behrouz biryani, faasos, freshmenu, mojo pizza, pizza express, papa johns, subway, taco bell, dunkin donuts, baskin robbins, naturals ice cream
+            - Where you kind keywords similar to: cafe, bistro, lounge, brewery, grill, bar, restro, social, kitchen, taproom, pub, canteen, restaurant, dhaba, eatery, food court
 
             FOOD:
-            - Delivery: swiggy, zomato, uber eats, foodpanda, box8, rebel foods, eat.fit
-            - Keywords: food, balaji food, food freaks, meal, tiffin, catering
-            - (Only if NOT already classified as Dining or Grocery)
+            - Where you kind keywords similar to: swiggy, zomato, uber eats, foodpanda, box8, rebel foods, eat.fit
+            - Where you kind keywords similar to: food, balaji food, food freaks, meal, tiffin, catering
 
             GROCERY:
-            - Online: swiggy instamart, instamart, blinkit, zepto, bigbasket, bbnow, bb now, country delight, countrydelight, grofers, amazon fresh, flipkart grocery, jiomart, dunzo
-            - Retail: more, reliance fresh, dmart, spencer's, heritage fresh, easyday, nilgiris, foodworld, hypercity, star bazaar, walmart, metro cash & carry
+            - Where you kind keywords similar to: swiggy instamart, instamart, blinkit, zepto, bigbasket, bbnow, bb now, country delight, countrydelight, grofers, amazon fresh, flipkart grocery, jiomart, dunzo
+            - Where you kind keywords similar to: more, reliance fresh, dmart, spencer's, heritage fresh, easyday, nilgiris, foodworld, hypercity, star bazaar, walmart, metro cash & carry
 
             MOVIE:
-            - Theaters: pvr, inox, cinepolis, carnival cinemas, miraj cinemas, delite cinemas, wave cinemas, fun cinemas, mukta cinemas, fame cinemas
-            - Platforms: bookmyshow, paytm movies, fandango
-            - Keywords: movie, cinema, film, multiplex
+            - Where you kind keywords similar to: pvr, inox, cinepolis, carnival cinemas, miraj cinemas, delite cinemas, wave cinemas, fun cinemas, mukta cinemas, fame cinemas
+            - Where you kind keywords similar to: bookmyshow, paytm movies, fandango
+            - Where you kind keywords similar to: movie, cinema, film, multiplex
 
             FUEL:
-            - Companies: petrol, diesel, fuel, hpcl, iocl, bpcl, bharat petroleum, indian oil, hindustan petroleum, reliance petroleum, essar oil, shell, total, bp
-            - Keywords: gas station, petrol pump, fuel station, cng, lpg
+            - Where you kind keywords similar to: petrol, diesel, fuel, hpcl, iocl, bpcl, bharat petroleum, indian oil, hindustan petroleum, reliance petroleum, essar oil, shell, total, bp
+            - Where you kind keywords similar to: gas station, petrol pump, fuel station, cng, lpg
 
             HEALTH:
-            - Online: netmeds, 1mg, pharmeasy, medlife, apollo pharmacy online, healthkart, wellness forever
-            - Retail: apollo pharmacy, guardian pharmacy, medplus, wellness pharmacy, fortis healthcare, max healthcare, manipal hospitals, narayana health
-            - Keywords: pharmacy, chemist, hospital, clinic, medical, health, wellness, doctor, diagnostic, pathology, lab, medicine, drug store
+            - Where you kind keywords similar to: netmeds, 1mg, pharmeasy, medlife, apollo pharmacy online, healthkart, wellness forever
+            - Where you kind keywords similar to: apollo pharmacy, guardian pharmacy, medplus, wellness pharmacy, fortis healthcare, max healthcare, manipal hospitals, narayana health
+            - Where you kind keywords similar to: pharmacy, chemist, hospital, clinic, medical, health, wellness, doctor, diagnostic, pathology, lab, medicine, drug store
 
             BILLS:
-            - Telecom: reliance jio, reliance infocomm, airtel, bharti airtel, bsnl, vi, vodafone idea, mtnl, tata teleservices, idea cellular
-            - Utilities: electricity, power, gas bill, water bill, broadband, internet, cable tv, dth, dish tv, tata sky, sun direct, videocon d2h, den networks
-            - Platforms: bbps, paytm bills, phonepe bills, gpay bills, mobikwik bills, freecharge
-            - Keywords: postpaid, prepaid, mobile, phone, recharge, telephony, utility, bill payment, municipal corporation
+            - Where you kind keywords similar to: reliance jio, reliance infocomm, airtel, bharti airtel, bsnl, vi, vodafone idea, mtnl, tata teleservices, idea cellular
+            - Where you kind keywords similar to: electricity, power, gas bill, water bill, broadband, internet, cable tv, dth, dish tv, tata sky, sun direct, videocon d2h, den networks
+            - Where you kind keywords similar to: bbps, paytm bills, phonepe bills, gpay bills, mobikwik bills, freecharge
+            - Where you kind keywords similar to: postpaid, prepaid, mobile, phone, recharge, telephony, utility, bill payment, municipal corporation
+
+            FOREX:
+            - Where you kind keywords similar to: markup, forex, cross currency, currency conversion, int'l tx, intl txn, fc conv, foreign currency, international fee
+            - Where you kind keywords similar to: If any transaction present in the credit card statement has FYC markup, forex, markup present, then consider it as forex.
+            
+            BANK_SPECIFIC_PORTAL:
+            - Where you kind keywords similar to: smartbuy, hdfc smartbuy
+            - Where you kind keywords similar to: ishop, icici shop, icicibank.com/shop, icici store
+            - Where you kind keywords similar to: grabdeals, axis grabdeals, axis rewards
+            - Where you kind keywords similar to: sbicard rewards, sbi rewards, sbicard shop, sbi delight
+            - Where you kind keywords similar to: kotak rewards, kotak deals, kotakfavourites
+            - Where you kind keywords similar to: rbl rewards, rbl shop, rbl delight
+            - Where you kind keywords similar to: yesrewardz, yes cart, yes bank deals
+            - Where you kind keywords similar to: sc smartbuy, scb rewards
+            - Where you kind keywords similar to: hsbc rewards, hsbc shop
+            - Where you kind keywords similar to: indusind delights, indus shop
+
 
             OTHERS:
             - Everything that doesn't match any category above
-
-        4. CALCULATIONS:
-        - credit_utilization_ratio = ((credit_limit - available_credit) / credit_limit) * 100
-        - ratio = amount / total_spend
-        - percentage = ratio * 100
-        - For each category: sum amounts, count transactions
-
-        5. USER PERSONA LOGIC:
-        - high_spender: total_spend > 50000 OR credit_utilization_ratio > 70
-        - reward_optimizer: reward_points > 1000
-        - digital_native: online transactions > 80% of total
-        - food_enthusiast: (FOOD + DINING) > 30% of total spend
-        - travel_lover: (TRAVEL + CAB + HOTEL) > 20% of total spend
-        - shopper: SHOPPING > 40% of total spend
-        - entertainment_seeker: (MOVIE + DINING) > 25% of total spend
-        - health_conscious: HEALTH > 10% of total spend
-        - family_oriented: (GROCERY + HEALTH + BILLS) > 40% of total spend
-        - tech_savvy: digital payment platforms > 50% of transactions
-
-        6. FINANCIAL BEHAVIOR:
-        - utilization_level: LOW (<30%), MEDIUM (30-70%), HIGH (>70%)
-        - payment_behavior: Estimate based on outstanding vs minimum due
-        - spending_pattern: REGULAR (if consistent amounts), IRREGULAR otherwise
 
         RETURN ONLY THIS JSON FORMAT:
 
         {{
         "basic_features": {{
-            "credit_limit": 0,
-            "available_credit": 0,
-            "cash_limit": 0,
-            "available_cash": 0,
-            "credit_utilization_ratio": 0.0,
-            "total_amount_due": 0,
-            "minimum_amount_due": 0,
-            "reward_points": 0,
-            "bank_name": "",
-            "card_type": "",
-            "statement_date": "",
-            "payment_due_date": ""
+            "credit_limit": 0, // In case there are multiple statements, take its sum
         }},
         "transaction_metrics": {{
             "transaction_count": 0,
@@ -169,49 +164,33 @@ export class AnalyzeService {
             "smallest_transaction": 0
         }},
         "category_breakdown": {{
+            "SHOPPING" : {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "GROCERY" : {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "FOOD" : {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "DINING" : {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "MOVIE" : {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "FUEL" : {{"amount": 0, "percentage": 0.0, "count": 0}}, 
+            "UPI": {{"amount": 0, "percentage": 0.0, "count": 0}},
             "CAB": {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "BUS/RAILWAY": {{"amount": 0, "percentage": 0.0, "count": 0}},
             "HOTEL": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "TRAVEL": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "SHOPPING": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "DINING": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "FOOD": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "GROCERY": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "MOVIE": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "FUEL": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "HEALTH": {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "FLIGHT": {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "GOLF": {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "FOREX": {{"amount": 0, "percentage": 0.0, "count": 0}},
             "BILLS": {{"amount": 0, "percentage": 0.0, "count": 0}},
-            "OTHERS": {{"amount": 0, "percentage": 0.0, "count": 0}}
+            "BANK_SPECIFIC_PORTAL": {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "HEALTH": {{"amount": 0, "percentage": 0.0, "count": 0}},
+            "Others": {{"amount": 0, "percentage": 0.0, "count": 0}}, 
         }},
-        "transactions": [
-            {{
-            "date": "YYYY-MM-DD",
-            "merchant": "Merchant Name",
-            "amount": 0,
-            "category": "CATEGORY_NAME"
-            }}
-        ],
-        "top_categories": [],
-        "user_persona_indicators": {{
-            "high_spender": false,
-            "reward_optimizer": false,
-            "digital_native": false,
-            "food_enthusiast": false,
-            "travel_lover": false,
-            "shopper": false,
-            "entertainment_seeker": false,
-            "health_conscious": false,
-            "family_oriented": false,
-            "tech_savvy": false
-        }},
-        "financial_behavior": {{
-            "utilization_level": "LOW/MEDIUM/HIGH",
-            "payment_behavior": "FULL/MINIMUM/PARTIAL",
-            "spending_pattern": "REGULAR/IRREGULAR/SEASONAL"
-        }}
+        "top_categories": [], // Make sure it is ranged from top to bottom. And give only top 3 categories.
+        
         }}
 
         NOTE: For the category breakdown don't show for the ones for which the value is 0.
         NOTE: Pay very special care for the card type and bank name.
+        NOTE: For the category_breakdown part, make sure it is monthly. But if the data in the credit card statement is not a monthly data, take its average so that we get the montly data, but make sure averge monthly data are for these specific categories:- SHOPPING, GROCERY, FOOD & Dining, Movie & Entertainment,Fuel,UPI,Utility Bills and for the rest of the category take the sum of them
+        NOTE: In case there are multiple statements provided and they are of same month, then take the sum of them and if they are of different month, then take the average of them.
+        NOTE: For the category breakdown, if any transaction of which you're not sure about the category, then consider it as "Others".
 
         CREDIT CARD STATEMENT TEXT:
     ${pdfText}`;
