@@ -33,6 +33,7 @@ import { AnalyzeService } from '../services/analyzer.service';
 import { ProcessingResult } from '../interfaces/credit-card-analyzer.interface';
 import { GeminiService } from '../services/gemini.service';
 import { CrawlerAnalyzerService } from '../services/crawler-analyzer.service';
+import { GetRecommendationRequestDto} from '../dto/recommendation.dto';
 
 @Controller()
 export class CreditCardController {
@@ -266,5 +267,25 @@ export class CreditCardController {
     return {
       prompt: geminiService.getExtractionPrompt(),
     };
+  }
+
+  @Post('get-recommendations')
+  async getRecommendations(
+    @Body() request: GetRecommendationRequestDto,
+    @Headers('authorization') authorization: string,
+  ): Promise<string> {
+    const authToken = this.configService.get<string>('AUTH_TOKEN');
+    if (!authorization || authorization !== authToken) {
+      throw new BadRequestException('Invalid or missing authorization token');
+    }
+
+    try {
+      this.logger.log(`Getting recommendations for customer: ${request.customerId}`);
+      const recommendations = await this.creditCardService.getRecommendations(request);
+      return recommendations;
+    } catch (error) {
+      this.logger.error(`Failed to get recommendations: ${error.message}`);
+      throw new InternalServerErrorException('Failed to get recommendations');
+    }
   }
 }

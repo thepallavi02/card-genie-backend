@@ -6,6 +6,7 @@ import {
   CreditCardData,
   ProcessingResult,
 } from '../interfaces/credit-card-analyzer.interface';
+import { Groq } from 'groq-sdk';
 
 @Injectable()
 export class GeminiService {
@@ -282,6 +283,197 @@ Generate a JSON object with the following structure that captures both basic car
     } catch (error) {
       this.logger.error(`Data validation error: ${error.message}`);
       return data; // Return original data if validation fails
+    }
+  }
+
+  getRecommendationPrompt(user_persona, credit_cards_data): string {
+    return `You are an advanced credit card recommendation engine. Your task is to analyze user spending data and available credit card features to recommend the most beneficial credit card, maximizing the user's financial returns.
+
+        USER PERSONA:
+        ${user_persona}
+
+        AVAILABLE CREDIT CARDS DATABASE:
+        ${credit_cards_data}
+        
+        Task & Reasoning Process:
+
+        1.  Objective: For the given user persona, calculate the estimated maximum monthly financial return (in INR) from each of the provided credit cards based on their monthly spending profile.
+        2.  Calculation Methodology:
+                MOVIE:
+                    Below is how you calculate the value 
+                        - If BOGO: "BOGO, [Number] times per month, up to Rs [Amount] off per ticket."
+                        - If Percentage off: "[Percentage]% off, up to Rs [Amount] per month."
+                        - If fixed discount: "Rs [Amount] off per ticket, [Number] times per month."
+                SHOPPING:
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
+                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."
+                GROCERY:
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
+                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."    
+                FOOD:
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
+                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."
+                DINING:
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
+                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."
+                FUEL:
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No points on fuel."
+                        - Surcharge Waiver: "1% Surcharge waiver, capped at Rs [Amount] per month."
+                UPI:
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No points on UPI."
+                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."
+                UTILITY:
+                    Note: It should only consist of Electricity/Internet/Telephone Bills/Infocomm/Water Bills/Cooking Gas Bills/Cable TV Bills/Govt. Bills.
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No points on utility bills."
+                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."    
+                RAILWAY (Train):
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No specific benefits."
+                        - Other Benefits: "[Description of specific railway benefits, e.g., lounge access at stations, if applicable]"
+                FLIGHT(Travel):
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No specific benefits."
+                        - Other Benefits: "[Description of specific flight benefits, e.g., lounge access at stations, if applicable]"  
+                HOTEL(Travel):
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No specific benefits."
+                        - Other Benefits: "[Description of specific benefits]"        
+                Reward Point (Base Rate & Value):
+                    Below is how you calculate the value
+                        - Base Rate: "[X] Reward Points for every Rs [Y] spent (on general retail/non-excluded categories)."
+                        - Highest Redemption Value: "[1 RP = Rs Z]" (Specify type, e.g., "Flights/Hotels/Specific Brand Vouchers")
+                        - Other Redemption Value: "[1 RP = Rs Z]" (Specify type, e.g., "General Catalogue Products/Vouchers")
+                        - Cashback Redemption Value: "[1 RP = Rs Z]" (If convertible to statement credit/cashback)
+                Domestic Lounge:
+                    Below is how you calculate the value
+                        - Access: "[Number] access per [Quarter/Year]" OR "Unlimited access."
+                        - Guest Access: "Plus [Number] guest visits per [Quarter/Year]" (if applicable).
+                        - Estimated Value per Visit (for calculation): Rs 1,000 (Use this for calculation if card doesn't state value.)
+                International Lounge:
+                    Below is how you calculate the value
+                        - Access: "[Number] access per [Quarter/Year]" OR "Unlimited access."
+                        - Guest Access: "Plus [Number] guest visits per [Quarter/Year]" (if applicable).
+                        - Estimated Value per Visit (for calculation): Rs 2,500 (Use this for calculation if card doesn't state value.)
+                HOTEL:
+                    Below is how you calculate the value
+                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
+                        - Discount/Free Nights: "[Percentage]% off" or "[Number] free nights/discounts through specific platform/partner."
+                GOLF:
+                    Below is how you calculate the value
+                        - Access: "[Number] complimentary rounds/lessons per [Month/Year]" OR "Unlimited access."
+                        - Estimated Value per Round (for calculation): Rs 5,000 (Use this for calculation if card doesn't state value.)
+                FOREX Markup (as a reward/benefit if 0%): "[Percentage]% (If 0% waiver, state 0%. Otherwise, state the standard markup for comparison.)"
+                CASHBACK (Direct):
+                    Below is how you calculate the value
+                        - "[Percentage]% direct cashback, up to Rs [Amount] per [Month/Statement Cycle]."
+                Smartbuy/Grab Deals/iShop/Bank-Specific Portal Usage (for accelerated rewards):
+                    Below is how you calculate the value
+                        - Travel (Flights/Trains): "Up to [X]X Reward Points" or "[Percentage]% discount" on [Specific Platform, e.g., Smartbuy, iShop].
+                        - Hotel Booking: "Up to [X]X Reward Points" or "[Percentage]% discount" on [Specific Platform, e.g., Smartbuy, iShop].
+                        - Shopping: "Up to [X]X Reward Points" or "[Percentage]% discount" on [Specific Platform, e.g., Smartbuy, iShop], or "Vouchers at [1 RP = Rs Z] via platform."
+                Other Quantifiable Rewards: [Add any other distinct reward categories found on the page, with quantifiable values.]
+                
+        3.  Output Format: 
+        NOTE: The output should be strictly in the below format:
+
+            {{
+          "topRecommendations": [
+            {{
+              "rank": 1,
+                    "cardName": "HDFC Diners Club Black",
+                    "totalReturn": "In rupees",
+                    "currentReturn": "In rupees",
+                    "returnBreakup": {{
+                        "MOVIE": "In rupees",
+                        "SHOPPING": "In rupees",
+                        "GROCERY": "In rupees",
+                        "FOOD": "In rupees",
+                        "DINING": "In rupees",
+                        "FUEL": "In rupees",
+                        "UPI": "In rupees",
+                        "UTILITY": "In rupees",
+                        "RAILWAY": "In rupees",
+                        "others": "In rupees"
+                    }}
+                    }},
+                    {{
+                    "rank": 2,
+                    "cardName": "SBI Card PRIME",
+                    "totalReturn": "In rupees",
+                    "currentReturn": "In rupees",
+                    "returnBreakup": {{
+                        "MOVIE": "In rupees",
+                        "SHOPPING": "In rupees",
+                        "GROCERY": "In rupees",
+                        "FOOD": "In rupees",
+                        "DINING": "In rupees",
+                        "FUEL": "In rupees",
+                        "UPI": "In rupees",
+                        "UTILITY": "In rupees",
+                        "RAILWAY": "In rupees",
+                        "others": "In rupees"
+                    }}
+                    }},
+                    {{
+                    "rank": 3,
+                    "cardName": "ICICI Amazon Pay",
+                    "totalReturn": "In rupees",
+                    "currentReturn": "In rupees",
+                    "returnBreakup": {{
+                        "MOVIE": "In rupees",
+                        "SHOPPING": "In rupees",
+                        "GROCERY": "In rupees",
+                        "FOOD": "In rupees",
+                        "DINING": "In rupees",
+                        "FUEL": "In rupees",
+                        "UPI": "In rupees",
+                        "UTILITY": "In rupees",
+                        "RAILWAY": "In rupees",
+                        "others": "In rupees"
+                    }}
+                    }}
+                ]
+            }}
+        """`;
+  }
+
+  async recommendationWithGroq(prompt: string): Promise<any> {
+    this.logger.log('Sending request to Groq API');
+
+    if (!this.groqApiKey) {
+      this.logger.error('GROQ_API_KEY is not set in environment variables');
+      throw new Error('GROQ_API_KEY is not configured');
+    }
+
+    const apiUrl = 'https://api.groq.ai/v1/chat/completions';
+    this.logger.log(`Attempting to connect to: ${apiUrl}`);
+
+    try {
+      // Initialize the Groq client
+      const groq = new Groq({ apiKey: this.groqApiKey });
+      const response = await groq.chat.completions.create({
+        messages: [{ role: 'user', content: prompt }],
+        model: this.groqModel,
+        temperature: 0.1,
+      });
+      const cleanedJsonString = response.choices[0]?.message?.content?.trim();
+      console.log(cleanedJsonString);
+      const jsonStart = cleanedJsonString.indexOf('{');
+      const jsonEnd = cleanedJsonString.lastIndexOf('}') + 1;
+      if (jsonStart === -1 || jsonEnd === 0) {
+        throw new Error('No valid JSON found in response');
+      }
+      const jsonStr = cleanedJsonString.substring(jsonStart, jsonEnd);
+      return JSON.parse(jsonStr);
+    } catch (error) {
+      return null;
     }
   }
 }
