@@ -50,7 +50,7 @@ export class CreditCardService {
     cardName: string,
     customerId: string,
   ): Promise<UploadDocResponseDto> {
-    // Store information about all uploaded files in a single database entry
+    // Store information about each uploaded file in the database
     const documentIds: string[] = [];
 
     // Find the user by customerId
@@ -59,24 +59,22 @@ export class CreditCardService {
       throw new Error(`User with customerId ${customerId} not found`);
     }
 
-    // Get all file paths
-    const filePaths = files.map(file => file.path);
+    for (const file of files) {
+      const document = await this.documentModel.create({
+        user: user._id,
+        cardBank,
+        cardName,
+        filePath: file.path,
+        // In a real implementation, we would call Bedrock API here
+        // and store the response in bedrockResponse field
+        bedrockResponse: { status: 'processed' },
+      });
 
-    // Create a single document with all file paths
-    const document = await this.documentModel.create({
-      user: user._id,
-      cardBank,
-      cardName,
-      filePaths: filePaths,
-      // In a real implementation, we would call Bedrock API here
-      // and store the response in bedrockResponse field
-      bedrockResponse: { status: 'processed' },
-    });
-
-    documentIds.push(document._id.toString());
+      documentIds.push(document._id.toString());
+    }
 
     return {
-      message: 'PDFs uploaded successfully',
+      message: 'PDF uploaded successfully',
       documentIds,
     };
   }
@@ -120,18 +118,18 @@ export class CreditCardService {
     // Convert snake_case to camelCase for the analysis data
     const basicFeatures = {
       creditLimit: analysisData.basic_features.credit_limit,
-      // availableCredit: analysisData.basic_features.available_credit,
-      // cashLimit: analysisData.basic_features.cash_limit,
-      // availableCash: analysisData.basic_features.available_cash,
-      // creditUtilizationRatio:
-      //   analysisData.basic_features.credit_utilization_ratio,
-      // totalAmountDue: analysisData.basic_features.total_amount_due,
-      // minimumAmountDue: analysisData.basic_features.minimum_amount_due,
-      // rewardPoints: analysisData.basic_features.reward_points,
-      // bankName: analysisData.basic_features.bank_name,
-      // cardType: analysisData.basic_features.card_type,
-      // statementDate: analysisData.basic_features.statement_date,
-      // paymentDueDate: analysisData.basic_features.payment_due_date,
+      availableCredit: analysisData.basic_features.available_credit,
+      cashLimit: analysisData.basic_features.cash_limit,
+      availableCash: analysisData.basic_features.available_cash,
+      creditUtilizationRatio:
+        analysisData.basic_features.credit_utilization_ratio,
+      totalAmountDue: analysisData.basic_features.total_amount_due,
+      minimumAmountDue: analysisData.basic_features.minimum_amount_due,
+      rewardPoints: analysisData.basic_features.reward_points,
+      bankName: analysisData.basic_features.bank_name,
+      cardType: analysisData.basic_features.card_type,
+      statementDate: analysisData.basic_features.statement_date,
+      paymentDueDate: analysisData.basic_features.payment_due_date,
     };
 
     const transactionMetrics = {
@@ -157,32 +155,32 @@ export class CreditCardService {
     }
 
     // Convert transactions
-    // const transactions = analysisData.transactions.map((transaction) => ({
-    //   date: transaction.date,
-    //   merchant: transaction.merchant,
-    //   amount: transaction.amount,
-    //   category: transaction.category,
-    // }));
+    const transactions = analysisData.transactions.map((transaction) => ({
+      date: transaction.date,
+      merchant: transaction.merchant,
+      amount: transaction.amount,
+      category: transaction.category,
+    }));
 
-    // const userPersonaIndicators = {
-    //   highSpender: analysisData.user_persona_indicators.high_spender,
-    //   rewardOptimizer: analysisData.user_persona_indicators.reward_optimizer,
-    //   digitalNative: analysisData.user_persona_indicators.digital_native,
-    //   foodEnthusiast: analysisData.user_persona_indicators.food_enthusiast,
-    //   travelLover: analysisData.user_persona_indicators.travel_lover,
-    //   shopper: analysisData.user_persona_indicators.shopper,
-    //   entertainmentSeeker:
-    //     analysisData.user_persona_indicators.entertainment_seeker,
-    //   healthConscious: analysisData.user_persona_indicators.health_conscious,
-    //   familyOriented: analysisData.user_persona_indicators.family_oriented,
-    //   techSavvy: analysisData.user_persona_indicators.tech_savvy,
-    // };
+    const userPersonaIndicators = {
+      highSpender: analysisData.user_persona_indicators.high_spender,
+      rewardOptimizer: analysisData.user_persona_indicators.reward_optimizer,
+      digitalNative: analysisData.user_persona_indicators.digital_native,
+      foodEnthusiast: analysisData.user_persona_indicators.food_enthusiast,
+      travelLover: analysisData.user_persona_indicators.travel_lover,
+      shopper: analysisData.user_persona_indicators.shopper,
+      entertainmentSeeker:
+        analysisData.user_persona_indicators.entertainment_seeker,
+      healthConscious: analysisData.user_persona_indicators.health_conscious,
+      familyOriented: analysisData.user_persona_indicators.family_oriented,
+      techSavvy: analysisData.user_persona_indicators.tech_savvy,
+    };
 
-    // const financialBehavior = {
-    //   utilizationLevel: analysisData.financial_behavior.utilization_level,
-    //   paymentBehavior: analysisData.financial_behavior.payment_behavior,
-    //   spendingPattern: analysisData.financial_behavior.spending_pattern,
-    // };
+    const financialBehavior = {
+      utilizationLevel: analysisData.financial_behavior.utilization_level,
+      paymentBehavior: analysisData.financial_behavior.payment_behavior,
+      spendingPattern: analysisData.financial_behavior.spending_pattern,
+    };
 
     // Create the statement analysis
     const statementAnalysis = await this.statementAnalysisModel.create({
@@ -191,10 +189,10 @@ export class CreditCardService {
       basicFeatures,
       transactionMetrics,
       categoryBreakdown,
-      // transactions,
+      transactions,
       topCategories: analysisData.top_categories,
-      // userPersonaIndicators,
-      // financialBehavior,
+      userPersonaIndicators,
+      financialBehavior,
       analyzedAt: new Date(),
     });
 

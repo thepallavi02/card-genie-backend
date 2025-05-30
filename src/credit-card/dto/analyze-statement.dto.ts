@@ -2,8 +2,8 @@ import { IsNotEmpty, IsString } from 'class-validator';
 
 export class AnalyzeStatementRequestDto {
   @IsNotEmpty()
-  @IsString({ each: true })
-  filePaths: string[];
+  @IsString()
+  filePath: string;
 }
 
 export class AnalyzeStatementResponseDto {
@@ -21,7 +21,7 @@ export class AnalyzeStatementResponseDto {
     statementDate: string;
     paymentDueDate: string;
   };
-
+  
   transactionMetrics: {
     transactionCount: number;
     totalSpend: number;
@@ -29,7 +29,7 @@ export class AnalyzeStatementResponseDto {
     largestTransaction: number;
     smallestTransaction: number;
   };
-
+  
   categoryBreakdown: {
     [key: string]: {
       amount: number;
@@ -37,16 +37,16 @@ export class AnalyzeStatementResponseDto {
       count: number;
     };
   };
-
+  
   transactions: Array<{
     date: string;
     merchant: string;
     amount: number;
     category: string;
   }>;
-
+  
   topCategories: string[];
-
+  
   userPersonaIndicators: {
     highSpender: boolean;
     rewardOptimizer: boolean;
@@ -59,7 +59,7 @@ export class AnalyzeStatementResponseDto {
     familyOriented: boolean;
     techSavvy: boolean;
   };
-
+  
   financialBehavior: {
     utilizationLevel: string;
     paymentBehavior: string;

@@ -16,8 +16,8 @@ export class DocumentUpload {
   @Prop({ required: true })
   cardName: string;
 
-  @Prop({ required: true, type: [String] })
-  filePaths: string[];
+  @Prop({ required: true })
+  filePath: string;
 
   @Prop({ required: true, default: Date.now })
   uploadedAt: Date;

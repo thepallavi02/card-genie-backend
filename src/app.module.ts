@@ -10,8 +10,8 @@ import { DatabaseModule } from './database/database.module';
     ConfigModule.forRoot({
       isGlobal: true,
     }),
-    DatabaseModule, 
-    CreditCardModule
+    DatabaseModule,
+    CreditCardModule,
   ],
   controllers: [AppController],
   providers: [AppService],
