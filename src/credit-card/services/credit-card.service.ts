@@ -239,7 +239,7 @@ export class CreditCardService {
         try {
             // Get user's statement analysis
             const userPersona = await this.statementAnalysisModel
-                .findOne({})
+                .findOne({customerId: request.customerId})
                 .sort({analyzedAt: -1}).lean();
 
             // Get all available credit cards
