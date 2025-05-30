@@ -7,12 +7,14 @@ import {
   ProcessingResult,
 } from '../interfaces/credit-card-analyzer.interface';
 import { Groq } from 'groq-sdk';
-
 @Injectable()
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
   private genAI: GoogleGenerativeAI;
   private model: GenerativeModel;
+  private gr: GenerativeModel;
+  private readonly groqApiKey = process.env.GROQ_API_KEY;
+  private readonly groqModel = 'deepseek-r1-distill-llama-70b';
 
   constructor() {
     const apiKey =
@@ -21,6 +23,8 @@ export class GeminiService {
     this.model = this.genAI.getGenerativeModel({
       model: 'gemini-2.0-flash-exp',
     });
+
+
   }
 
   async uploadPdfFile(pdfPath: string): Promise<any> {
@@ -462,16 +466,48 @@ Generate a JSON object with the following structure that captures both basic car
         messages: [{ role: 'user', content: prompt }],
         model: this.groqModel,
         temperature: 0.1,
+        top_p: 1,
+        stop: null,
+        stream: false
       });
-      const cleanedJsonString = response.choices[0]?.message?.content?.trim();
-      console.log(cleanedJsonString);
-      const jsonStart = cleanedJsonString.indexOf('{');
-      const jsonEnd = cleanedJsonString.lastIndexOf('}') + 1;
-      if (jsonStart === -1 || jsonEnd === 0) {
-        throw new Error('No valid JSON found in response');
+      let cleanedJsonString = response. choices[0]?.message?.content?.trim();
+      // 1) Remove all <think>…</think> blocks (and any stray <think> or </think> tags)
+      const thinkBlockRegex = /<think>[\s\S]*?<\/think>/gi;
+      cleanedJsonString = cleanedJsonString
+          // first drop entire blocks
+          .replace(thinkBlockRegex, '')
+          // then just in case there are orphan tags
+          .replace(/<\/?think>/gi, '')
+          .trim();
+
+      // Regex to match ```json ... ``` or ``` ... ``` blocks
+      const tripleBacktickRegex = /^```(?:json)?\s*([\s\S]*?)\s*```$/;
+      const match = cleanedJsonString.match(tripleBacktickRegex);
+      // this.logger.debug(`Cleaned JSON String: ${cleanedJsonString}`);
+
+      if (match && match[1]) {
+        // If triple backticks found, use the content inside
+        cleanedJsonString = match[1].trim();
+        this.logger.debug('Removed triple backticks from LLM response.');
+      } else if (
+          cleanedJsonString.startsWith('`') &&
+          cleanedJsonString.endsWith('`')
+      ) {
+        // If single backticks found, remove them
+        cleanedJsonString = cleanedJsonString.substring(1, cleanedJsonString.length - 1).trim();
+        this.logger.debug('Removed single backticks from LLM response.');
       }
-      const jsonStr = cleanedJsonString.substring(jsonStart, jsonEnd);
-      return JSON.parse(jsonStr);
+      const parsedResponse = JSON.parse(cleanedJsonString);
+
+
+      console.log(parsedResponse);
+      // const jsonStart = cleanedJsonString.indexOf('{');
+      // const jsonEnd = cleanedJsonString.lastIndexOf('}') + 1;
+      // if (jsonStart === -1 || jsonEnd === 0) {
+      //   throw new Error('No valid JSON found in response');
+      // }
+      // const jsonStr = cleanedJsonString.substring(jsonStart, jsonEnd);
+      return parsedResponse;
     } catch (error) {
       return null;
     }

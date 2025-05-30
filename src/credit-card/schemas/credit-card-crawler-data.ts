@@ -34,6 +34,17 @@ export class CreditCardAnalysis {
 
   @Prop({ default: Date.now })
   analyzedAt: Date;
+
+  @Prop({type:Object})
+  feeStructure:{
+    joiningFee: string;
+    annualFee: string;
+    renewalFee: string;
+    renewalFeeWaiver: string;
+    forexMarkup: string;
+    fuelSurchargeWaiver: string;
+    others: string;
+  }
 }
 
 export const CreditCardAnalysisSchema =

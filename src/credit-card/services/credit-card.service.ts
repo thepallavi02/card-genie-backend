@@ -235,28 +235,43 @@ export class CreditCardService {
 
     async getRecommendations(
         request: GetRecommendationRequestDto,
-    ): Promise<string> {
+    ): Promise<any> {
         try {
             // Get user's statement analysis
             const userPersona = await this.statementAnalysisModel
-                .findOne({customerId: request.customerId})
-                .sort({analyzedAt: -1});
+                .findOne({})
+                .sort({analyzedAt: -1}).lean();
 
             // Get all available credit cards
             const availableCards = await this.creditCardAnalysisModel.find(
                 {},
-                {rewardSummary: 1, _id: 0},
-            );
+                {cardName:1,rewardSummary: 1, _id: 0},
+            ).limit(10).lean();
 
             const prompt = this.geminiService.getRecommendationPrompt(
-                userPersona,
+                JSON.stringify(userPersona),
                 JSON.stringify(availableCards),
             );
 
             const answer = await this.geminiService.recommendationWithGroq(prompt);
+            const result = []
+            if(answer && answer['topRecommendations']){
+                for(const item of answer['topRecommendations']){
+                    let cardName = item['cardName'];
+                    const availableCards = await this.creditCardAnalysisModel.findOne(
+                        {cardName:cardName},
+                    ).lean();
+                    item['eligibilityCriteria'] = availableCards.eligibilityCriteria;
+                    item['rewardSummary'] = availableCards.rewardSummary;
+                    item['feeStructure'] = availableCards.feeStructure;
+                    item['benefits'] = availableCards.benefits;
+                    result.push(item);
+
+                }
+            }
 
             // Parse and validate the response
-            return answer;
+            return result;
         } catch (error) {
             this.logger.error(`Error getting recommendations: ${error.message}`);
             throw new Error(`Failed to get recommendations: ${error.message}`);

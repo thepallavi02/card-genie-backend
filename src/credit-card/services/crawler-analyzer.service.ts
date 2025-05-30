@@ -147,7 +147,7 @@ export class CrawlerAnalyzerService {
         eligibilityCriteria: result.eligibilityCriteria,
         rewardSummary: result.rewardSummary,
         benefits: result.benefits,
-        feesAndCharges: result.feeStructure,
+        feeStructure: result.feeStructure,
         analyzedAt: new Date(),
       });
 

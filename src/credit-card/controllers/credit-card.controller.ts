@@ -272,12 +272,8 @@ export class CreditCardController {
   @Post('get-recommendations')
   async getRecommendations(
     @Body() request: GetRecommendationRequestDto,
-    @Headers('authorization') authorization: string,
-  ): Promise<string> {
+  ): Promise<any> {
     const authToken = this.configService.get<string>('AUTH_TOKEN');
-    if (!authorization || authorization !== authToken) {
-      throw new BadRequestException('Invalid or missing authorization token');
-    }
 
     try {
       this.logger.log(`Getting recommendations for customer: ${request.customerId}`);
