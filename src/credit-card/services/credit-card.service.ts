@@ -289,12 +289,8 @@ export class CreditCardService {
             let count = 0;
             if(currentEarning && currentEarning['totalReturn']){
                 currentEarningAmount =currentEarning['totalReturn']
-                count = currentEarningCard.length
             }
 
-            if(count>0){
-                currentEarningAmount = Number(Number(currentEarningAmount/count).toFixed(2));
-            }
             if(answer && answer['topRecommendations']){
                 for(const item of answer['topRecommendations']){
                     let cardName = item['cardName'];
