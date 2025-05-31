@@ -251,7 +251,7 @@ export class CreditCardService {
 
             // Get all available credit cards
             const availableCards = await this.creditCardAnalysisModel.find(
-                {"isActive":true},
+                {},
                 {cardName:1,rewardSummary: 1, _id: 0},
             ).lean();
 
@@ -302,7 +302,7 @@ export class CreditCardService {
                     item['rewardSummary'] = availableCards?.rewardSummary;
                     item['feeStructure'] = availableCards?.feeStructure;
                     item['benefits'] = item?.benefits;
-
+                    item['feeStructure'] = availableCards?.feeStructure;
                     item['currentReturn'] = currentEarningAmount;
                     result.push(item);
 
