@@ -304,6 +304,7 @@ export class CreditCardService {
                     item['benefits'] = item?.benefits;
                     item['feeStructure'] = availableCards?.feeStructure;
                     item['currentReturn'] = currentEarningAmount;
+                    item['applyUrl'] = availableCards?.applyUrl;
                     result.push(item);
 
                 }

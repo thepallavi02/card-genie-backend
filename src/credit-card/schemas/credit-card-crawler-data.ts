@@ -48,6 +48,9 @@ export class CreditCardAnalysis {
 
   @Prop()
   isActive: boolean;
+
+  @Prop()
+  applyUrl: string;
 }
 
 export const CreditCardAnalysisSchema =
