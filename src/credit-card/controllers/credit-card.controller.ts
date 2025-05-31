@@ -143,10 +143,10 @@ export class CreditCardController {
 
       try {
         const pdfText = await this.analyzer.extractTextFromPdf(fileBuffer);
-        combinedText +=`\\n\\n=== CREDIT CARD STATEMENT ${i+1} ===\\n` ;
-        combinedText += `Source: ${file.path}\\n`;
+        combinedText +=`\n\n=== CREDIT CARD STATEMENT ${i+1} ===\n` ;
+        combinedText += `Source: ${file.path}\n`;
         combinedText += `${pdfText}\n`;
-        combinedText += `=== END OF STATEMENT ${i+1} ===\\n\\n`;
+        combinedText += `=== END OF STATEMENT ${i+1} ===\n\n`;
       } catch (error) {
         this.logger.error(`Error extracting text from PDF ${file.path}: ${error.message}`);
       }
