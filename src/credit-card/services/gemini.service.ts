@@ -427,7 +427,7 @@ ${credit_cards_data}
 **Direct Cashback**: "1.5% direct cashback, up to Rs 2,000 per month"
   - Calculation: Min(Total Monthly Spend × 0.015, Rs 2,000)
 
-## CALCULATION PROCESS:
+## CALCULATION PROCESS (Note: Do not use welcome benefit or welcome bonus for calculations as it is only one time):
 
 ### Step 1: For Each Credit Card in Database
 Extract all reward structures from rewardSummary array
