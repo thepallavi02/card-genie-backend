@@ -305,6 +305,7 @@ export class CreditCardService {
                     item['feeStructure'] = availableCards?.feeStructure;
                     item['currentReturn'] = currentEarningAmount;
                     item['applyUrl'] = availableCards?.applyUrl;
+                    item['imageUrl'] = 'https://gromo-ai-hackathon-new.s3.ap-south-1.amazonaws.com/'+cardName?.replace(/\s+/g, '+') + '.png'
                     result.push(item);
 
                 }
