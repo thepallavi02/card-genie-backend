@@ -292,14 +292,14 @@ Generate a JSON object with the following structure that captures both basic car
     }
   }
 
-  getRecommendationPrompt(user_persona, credit_cards_data): string {
+  getRecommendationPrompt(user_persona, credit_cards_data,card_name:any): string {
     return `
 
 # You are an advanced credit card recommendation engine. Your task is to analyze user spending data and available credit card features to recommend the most beneficial credit card, maximizing the user's financial returns.
 
 
 The USER PERSONA IS: 
-${user_persona}  
+${user_persona} 
 
 ## USER PERSONA FORMAT:
 The user persona will contain:
@@ -483,6 +483,7 @@ json
 6. Include annual benefits (like lounge access, etc) divided by 12 for monthly equivalent
 7. Clearly state any assumptions made in calculations
 
+## CRITICAL INSTRUCTION: Never include the current card of the user ${card_name} in the recommendations.
 ## CRITICAL INSTRUCTION: Analyze the provided user persona against EACH credit card in the database. Calculate exact monthly returns using the user's specific spending amounts and each card's reward structure. Rank cards by total return value and provide TOP 3 RECOMMENDATIONS ONLY with all monetary values prefixed with Rs. Example - Rs. 500. Note that there is a space between Rs and the amount.
 ## CRITICAL INSTRUCTION: Strictly output only pure JSON without any additional text. Never use \`\`\`json\`\`\` code blocks or any markdown formatting for JSON responses
 

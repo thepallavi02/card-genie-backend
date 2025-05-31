@@ -267,6 +267,7 @@ export class CreditCardService {
             const prompt = this.geminiService.getRecommendationPrompt(
                 JSON.stringify(userPersona),
                 JSON.stringify(availableCards),
+                JSON.stringify(request?.cardName)
             );
 
             const cuurentEarningPompt = this.geminiService.getRecommendationCurrentPrompt(
