@@ -185,6 +185,7 @@ export class CreditCardService {
                 amount: (details as any).amount,
                 percentage: (details as any).percentage,
                 count: (details as any).count,
+                brands: (details as any).brands,
             };
         }
 
