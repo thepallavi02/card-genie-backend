@@ -15,4 +15,7 @@ export class GetRecommendationRequestDto {
   @IsOptional()
   @IsString()
   spendingPattern?: string;
+
+  @IsOptional()
+  categoryBreakdown?:any
 }
