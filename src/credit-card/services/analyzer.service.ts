@@ -185,6 +185,7 @@ export class AnalyzeService {
             "Others": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}}, 
         }},
         "top_categories": [], // Make sure it is ranged from top to bottom. And give only top 3 categories.
+        "ai_insight":"" // Generate some insight based on the user's credit card statement
         
         }}
 
@@ -194,6 +195,8 @@ export class AnalyzeService {
         NOTE: In case there are multiple statements provided and they are of same month, then take the sum of them and if they are of different month, then take the average of them.
         NOTE: For the category breakdown, if any transaction of which you're not sure about the category, then consider it as "Others".
         NOTE: For the category breakdown section, in the brands field, give the list of brands that are present in the transaction under the category and it should be comma separated.
+        
+        ## CRITICAL INSTRUCTION: Strictly output only pure JSON without any additional text. Never use \`\`\`json\`\`\` code blocks or any markdown formatting for JSON responses
 
         CREDIT CARD STATEMENT TEXT:
     ${pdfText}`;

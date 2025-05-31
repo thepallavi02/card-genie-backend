@@ -34,6 +34,9 @@ import { ProcessingResult } from '../interfaces/credit-card-analyzer.interface';
 import { GeminiService } from '../services/gemini.service';
 import { CrawlerAnalyzerService } from '../services/crawler-analyzer.service';
 import { GetRecommendationRequestDto} from '../dto/recommendation.dto';
+import OpenAI from "openai";
+import * as process from "node:process";
+
 
 @Controller()
 export class CreditCardController {
@@ -117,11 +120,22 @@ export class CreditCardController {
 
     // Process all PDF files and combine their text
     let combinedText = '';
-
-
+    const openAiFile = []
+    const client = new OpenAI({apiKey:process.env.OPENAI_API_KEY});
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const fileBuffer = fs.readFileSync(file.path);
+
+      const fileData = await client.files.create({
+        file: fs.createReadStream(file.path),
+        purpose: "user_data",
+      });
+
+      openAiFile.push({
+        "type":"input_file",
+        "file_id":fileData.id
+      })
+
       if (!fileBuffer) {
         this.logger.error(`Failed to read file from disk: ${file.path}`);
         continue;
@@ -146,10 +160,23 @@ export class CreditCardController {
     }
 
     const prompt = this.analyzer.getExtractionPrompt(combinedText);
-    const response = await this.analyzer.analyzeWithGroq(prompt);
+
+    openAiFile.push({
+      "type": "input_text",
+      "text": prompt,
+    })
+    const responseData:any = await client.responses.create({
+      model: "gpt-4.1",
+      input: [
+        {
+          role: "user",
+          content: openAiFile,
+        },
+      ],
+    });
 
     // Clean and validate the response
-    const cleanedResponse = this.analyzer.validateAndCleanResponse(response);
+    const cleanedResponse = this.analyzer.validateAndCleanResponse(JSON.parse(responseData.output[0].content[0].text));
 
     // Save the analysis response to the database
     try {

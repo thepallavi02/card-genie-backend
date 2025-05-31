@@ -175,7 +175,7 @@ export class CreditCardService {
             smallestTransaction:
             analysisData.transaction_metrics.smallest_transaction,
         };
-
+        const aiInsight = analysisData.ai_insight
         // Convert category breakdown
         const categoryBreakdown = {};
         for (const [category, details] of Object.entries(
@@ -227,6 +227,7 @@ export class CreditCardService {
             categoryBreakdown,
             // transactions,
             topCategories: analysisData.top_categories,
+            aiInsight:aiInsight,
             // userPersonaIndicators,
             // financialBehavior,
             analyzedAt: new Date(),

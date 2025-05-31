@@ -164,6 +164,9 @@ export class StatementAnalysis {
   @Prop({ type: [String], required: true })
   topCategories: string[];
 
+  @Prop()
+  aiInsight:string
+
   // @Prop({ type: UserPersonaIndicators, required: true })
   // userPersonaIndicators: UserPersonaIndicators;
 
