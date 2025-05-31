@@ -486,6 +486,217 @@ json
 
   }
 
+  getRecommendationCurrentPrompt(user_persona, credit_cards_data): string {
+    return `You are an advanced credit card return calculator. Your task is to analyze a user's actual spending data and their current credit card's features to calculate the actual returns they are earning from their existing card.
+
+TASK OVERVIEW:
+Input: User persona (monthly spending data) + User's Current Credit Card details
+Process: Calculate actual monthly returns the user earned from their current card
+Output: Detailed breakdown of current returns by spending category
+
+The USER PERSONA IS: 
+${user_persona}  
+
+CURRENT CREDIT CARDS DETAILS:
+${credit_cards_data}
+
+USER PERSONA STRUCTURE:
+The user persona contains actual monthly spending data across categories:
+
+category_breakdown: Actual monthly spending amounts per category
+transaction_metrics: Overall monthly spending statistics
+basic_features: User's credit profile
+
+CURRENT CARD ANALYSIS:
+You will analyze the user's existing credit card (provided in the credit card database) to calculate what they actually earned based on their real spending pattern.
+
+CALCULATION METHODOLOGY WITH EXAMPLES:
+MOVIE Category:
+Current Card Benefit & Actual Return Calculation:
+
+BOGO: "BOGO, 4 times per month, up to Rs 200 off per ticket"
+User's Actual Movie Spend: Rs [amount from user persona]
+Actual Return Calculation: Based on actual number of movie transactions
+Example: If user spent Rs 800 on 2 movies, got 2 free tickets = Rs 400 return
+
+Percentage off: "20% off, up to Rs 500 per month"
+Actual Return: Min(User's Actual Movie Spend × 0.20, Rs 500)
+
+No Benefits: Rs 0
+
+SHOPPING Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "2 Reward Points per Rs 100 spent"
+User's Actual Shopping Spend: Rs [amount from category_breakdown.SHOPPING.amount]
+Actual Return: (Actual Shopping Spend ÷ 100) × 2 × Redemption Value
+Example: Rs 23,182.71 ÷ 100 × 2 × Rs 1 = Rs 463.65
+
+Cashback: "5% cashback, up to Rs 1,000 per month"
+Actual Return: Min(Actual Shopping Spend × 0.05, Rs 1,000)
+
+
+GROCERY Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "3 Reward Points per Rs 100 spent"
+User's Actual Grocery Spend: Rs [amount from category_breakdown.GROCERY.amount]
+Actual Return: (Actual Grocery Spend ÷ 100) × 3 × Redemption Value
+Example: Rs 2,999 ÷ 100 × 3 × Rs 1 = Rs 89.97
+
+No Benefits: Rs 0
+
+FOOD Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "4 Reward Points per Rs 100 spent"
+User's Actual Food Spend: Rs [amount from category_breakdown.FOOD.amount]
+Actual Return: (Actual Food Spend ÷ 100) × 4 × Redemption Value
+Example: Rs 3,928.21 ÷ 100 × 4 × Rs 1 = Rs 157.13
+
+
+DINING Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "5 Reward Points per Rs 100 spent"
+User's Actual Dining Spend: Rs [amount from category_breakdown.DINING.amount]
+Actual Return: (Actual Dining Spend ÷ 100) × 5 × Redemption Value
+Example: Rs 256 ÷ 100 × 5 × Rs 1 = Rs 12.80
+
+
+FUEL Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "2 Reward Points per Rs 100 spent"
+Actual Return: (Actual Fuel Spend ÷ 100) × 2 × Redemption Value
+
+Surcharge Waiver: "1% Surcharge waiver, capped at Rs 200 per month"
+Actual Return: Min(Actual Fuel Spend × 0.01, Rs 200)
+
+No Points: Rs 0
+
+UPI Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "1 Reward Point per Rs 100 spent"
+User's Actual UPI Spend: Rs [amount from category_breakdown.UPI.amount]
+Actual Return: (Actual UPI Spend ÷ 100) × 1 × Redemption Value
+Example: Rs 297 ÷ 100 × 1 × Rs 1 = Rs 2.97
+
+No Points: Rs 0
+
+UTILITY Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "1 Reward Point per Rs 100 spent"
+Actual Return: (Actual Utility Spend ÷ 100) × 1 × Redemption Value
+
+No Points: Rs 0
+
+RAILWAY Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "2 Reward Points per Rs 100 spent"
+Actual Return: (Actual Railway Spend ÷ 100) × 2 × Redemption Value
+
+No Benefits: Rs 0
+
+FLIGHT Category:
+Current Card Benefit & Actual Return Calculation:
+
+Reward Points: "3 Reward Points per Rs 100 spent"
+Actual Return: (Actual Flight Spend ÷ 100) × 3 × Redemption Value
+
+No Benefits: Rs 0
+
+Base Reward Points:
+Current Card Benefit & Actual Return Calculation:
+
+Base Rate: "1 Reward Point for every Rs 100 spent"
+Applied to: Categories without specific benefits + Others category
+Actual Return: (Actual Spend in applicable categories ÷ 100) × 1 × Redemption Value
+
+
+Domestic Lounge:
+Current Card Benefit & Actual Usage Calculation:
+
+Access: "4 access per quarter"
+Monthly Equivalent: 4 × 4 ÷ 12 = 1.33 visits per month
+Actual Value: 1.33 × Rs 1,000 = Rs 1,333 per month (if user travels)
+
+Note: Calculate based on estimated usage frequency
+
+International Lounge:
+Current Card Benefit & Actual Usage Calculation:
+
+Access: "2 access per year"
+Monthly Equivalent: 2 ÷ 12 = 0.17 visits per month
+Actual Value: 0.17 × Rs 2,500 = Rs 417 per month (if user travels internationally)
+
+
+GOLF:
+Current Card Benefit & Actual Usage Calculation:
+
+Access: "1 complimentary round per month"
+Actual Value: Rs 5,000 per month (if user plays golf)
+
+
+Direct Cashback:
+Current Card Benefit & Actual Return Calculation:
+
+Direct Cashback: "1.5% direct cashback, up to Rs 2,000 per month"
+Actual Return: Min(User's Total Monthly Spend × 0.015, Rs 2,000)
+
+
+CALCULATION PROCESS:
+Step 1: Identify User's Current Card
+Extract the specific credit card details from the database that matches the user's current card
+
+Step 2: For Each Spending Category
+Get user's actual monthly spending amount from persona
+Apply current card's specific benefit for that category
+Calculate actual return using formulas above
+Apply caps and restrictions that limited actual returns
+
+Step 3: Calculate Total Current Return
+Sum all category returns + annual benefits actually utilized (divided by 12)
+
+
+OUTPUT FORMAT:
+{
+  "totalReturn": "[Total monthly return user actually earned]",
+  "returnBreakup": {
+        "MOVIE": "[Return amount or 0 if no spending/benefit]",
+        "SHOPPING": "[Calculated return based on spending and card benefits]",
+        "GROCERY": "[Calculated return based on spending and card benefits]",
+        "FOOD": "[Calculated return based on spending and card benefits]",
+        "DINING": "[Calculated return based on spending and card benefits]",
+        "FUEL": "[Return amount or 0 if no spending/benefit]",
+        "UPI": "[Calculated return - often 0 due to restrictions]",
+        "UTILITY": "[Return amount or 0 if no spending/benefit]",
+        "RAILWAY": "[Return amount or 0 if no spending/benefit]",
+        "others": "[Return from base rate on Others category + any other benefits like lounge access value]"
+      }
+}
+
+## IMPORTANT NOTES:
+1. Use EXACT spending amounts from user persona
+2. Apply all caps and restrictions mentioned in card benefits
+3. The return benefit should strictly be calculated for all the categories present in the user persona.
+4. For categories with no user spending, return should be 0
+5. For "Others" category, apply base reward rate or percentage discount only
+6. Include annual benefits (like lounge access, etc) divided by 12 for monthly equivalent
+7. Clearly state any assumptions made in calculations
+
+## CRITICAL INSTRUCTION: Analyze the provided user persona against their CURRENT credit card only. Calculate the exact monthly returns the user actually earned based on their real spending pattern and their current card's reward structure.
+## CRITICAL INSTRUCTION: Strictly output only pure JSON without any additional text. Never use \`\`\`json\`\`\` code blocks or any markdown formatting for JSON responses
+
+
+`;
+
+
+  }
+
   async recommendationWithGroq(prompt: string): Promise<any> {
     this.logger.log('Sending request to Groq API');
 
