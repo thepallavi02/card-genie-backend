@@ -239,9 +239,15 @@ export class CreditCardService {
     ): Promise<any> {
         try {
             // Get user's statement analysis
-            const userPersona = await this.statementAnalysisModel
-                .findOne({customerId: request.customerId})
-                .sort({analyzedAt: -1}).lean();
+            let userPersona = {};
+            if(request.categoryBreakdown){
+                userPersona['categoryBreakdown'] = request.categoryBreakdown;
+            }
+            else{
+                userPersona = await this.statementAnalysisModel
+                    .findOne({customerId: request.customerId})
+                    .sort({analyzedAt: -1}).lean();
+            }
 
             // Get all available credit cards
             const availableCards = await this.creditCardAnalysisModel.find(
