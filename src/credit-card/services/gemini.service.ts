@@ -442,7 +442,7 @@ Apply caps and restrictions
 Sum all category returns + annual benefits (divided by 12)
 
 ### Step 4: Rank Cards
-Sort by total monthly return (highest to lowest)
+Sort by total monthly return (highest to lowest) and select TOP 3 cards only
 
 ## OUTPUT FORMAT:
 json
@@ -478,7 +478,7 @@ json
 6. Include annual benefits (like lounge access, etc) divided by 12 for monthly equivalent
 7. Clearly state any assumptions made in calculations
 
-## CRITICAL INSTRUCTION: Analyze the provided user persona against EACH credit card in the database. Calculate exact monthly returns using the user's specific spending amounts and each card's reward structure. Rank cards by total return value.
+## CRITICAL INSTRUCTION: Analyze the provided user persona against EACH credit card in the database. Calculate exact monthly returns using the user's specific spending amounts and each card's reward structure. Rank cards by total return value and provide TOP 3 RECOMMENDATIONS ONLY with all monetary values prefixed with Rs. Example - Rs. 500. Note that there is a space between Rs and the amount.
 ## CRITICAL INSTRUCTION: Strictly output only pure JSON without any additional text. Never use \`\`\`json\`\`\` code blocks or any markdown formatting for JSON responses
 
 `;

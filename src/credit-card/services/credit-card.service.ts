@@ -262,10 +262,18 @@ export class CreditCardService {
                 JSON.stringify(userPersona),
                 JSON.stringify(currentEarningCard),
             );
-            let [answer,currentEarning] = await Promise.all([
-                this.geminiService.makeOpenAICall(prompt),
-                this.geminiService.makeOpenAICall(cuurentEarningPompt),
-            ])
+            let answer = [];
+            let currentEarning=[];
+            if(currentEarningCard && currentEarningCard.length>0){
+                [answer,currentEarning] = await Promise.all([
+                    this.geminiService.makeOpenAICall(prompt),
+                    this.geminiService.makeOpenAICall(cuurentEarningPompt),
+                ])
+            }
+            else{
+                answer = await this.geminiService.makeOpenAICall(prompt);
+            }
+
             const result = []
             let currentEarningAmount = 0;
             if(currentEarning && currentEarning['topRecommendations']){
