@@ -184,9 +184,7 @@ export class AnalyzeService {
             "HEALTH": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}},
             "Others": {{"amount": 0, "percentage": 0.0, "count": 0, "brands": ""}}, 
         }},
-        "top_categories": [], // Make sure it is ranged from top to bottom. And give only top 3 categories.
-        "ai_insight":"" // Generate some insight based on the user's credit card statement
-        
+        "top_categories": [], // Make sure it is ranged from top to bottom. And give only top 3 categories.        
         }}
 
         NOTE: For the category breakdown don't show for the ones for which the value is 0.
