@@ -465,7 +465,12 @@ json
         "RAILWAY": "[Return amount or 0 if no spending/benefit]",
         "others": "[Return from base rate on Others category + any other benefits like lounge access value]"
       },
-      "calculationNotes": "[Explain key assumptions, caps applied, etc.]"
+      "calculationNotes": "[Explain key assumptions, caps applied, etc.]",
+      "benefits": [{
+                "title":"string" // Give 4 benefits for each recommended card supporting the returnBreakup. Each benefit should be concisely described, e.g., "4 BOGO movie tickets per month, 2% fuel surcharge waiver, 5% cashback on shopping, 1 complimentary domestic lounge access per quarter."
+            }],
+      "ai_insights": "" // The ai insight should be based on the user persona supporting the top recommendation.
+      
     }
   ]
 }

@@ -303,7 +303,8 @@ export class CreditCardService {
                     item['eligibilityCriteria'] = availableCards?.eligibilityCriteria;
                     item['rewardSummary'] = availableCards?.rewardSummary;
                     item['feeStructure'] = availableCards?.feeStructure;
-                    item['benefits'] = availableCards?.benefits;
+                    item['benefits'] = item?.benefits;
+                    item['ai_insights'] = item?.ai_insights;
                     item['currentReturn'] = currentEarningAmount;
                     result.push(item);
 
