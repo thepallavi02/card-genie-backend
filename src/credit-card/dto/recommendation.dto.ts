@@ -5,8 +5,8 @@ export class GetRecommendationRequestDto {
   @IsString()
   customerId: string;
 
-  @IsNotEmpty()
-  cardName: string[];
+  @IsOptional()
+  cardName?: string[];
 
   @IsOptional()
   @IsString()

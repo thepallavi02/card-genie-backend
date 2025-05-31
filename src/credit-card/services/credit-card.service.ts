@@ -248,10 +248,14 @@ export class CreditCardService {
                 {cardName:1,rewardSummary: 1, _id: 0},
             ).lean();
 
-            const currentEarningCard = await this.creditCardAnalysisModel.find(
-                {"cardName":{"$in":request.cardName}},
-                {cardName:1,rewardSummary: 1, _id: 0},
-            ).limit(50).lean();
+            let currentEarningCard = [];
+            if(request.cardName){
+                currentEarningCard = await this.creditCardAnalysisModel.find(
+                    {"cardName":{"$in":request.cardName}},
+                    {cardName:1,rewardSummary: 1, _id: 0},
+                ).limit(50).lean();
+            }
+
 
             const prompt = this.geminiService.getRecommendationPrompt(
                 JSON.stringify(userPersona),
