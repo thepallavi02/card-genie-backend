@@ -445,6 +445,7 @@ Sum all category returns + annual benefits (divided by 12)
 Sort by total monthly return (highest to lowest) and select TOP 3 cards only
 
 ## OUTPUT FORMAT:
+### NOTE: In the output only include the breakup of categories with non-zero returns. If a category has no spending or benefit, it should not be included in the output. And make sure to sort it by return value in descending order.
 json
 {
   "topRecommendations": [
