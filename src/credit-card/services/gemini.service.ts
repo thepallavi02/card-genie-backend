@@ -445,6 +445,7 @@ Sum all category returns + annual benefits (divided by 12)
 Sort by total monthly return (highest to lowest) and select TOP 3 cards only
 
 ## OUTPUT FORMAT:
+### NOTE: In the output only include the breakup of categories with non-zero returns. If a category has no spending or benefit, it should not be included in the output. And make sure to sort it by return value in descending order.
 json
 {
   "topRecommendations": [
@@ -490,9 +491,9 @@ json
     return `You are an advanced credit card return calculator. Your task is to analyze a user's actual spending data and their current credit card's features to calculate the actual returns they are earning from their existing card.
 
 TASK OVERVIEW:
-Input: User persona (monthly spending data) + User's Current Credit Card details
+Input: User persona (monthly spending data) + User's Current Credit Card(s) details
 Process: Calculate actual monthly returns the user earned from their current card
-Output: Detailed breakdown of current returns by spending category
+Output: totalReturn based on the instruction provided below
 
 The USER PERSONA IS: 
 ${user_persona}  
@@ -649,34 +650,28 @@ Actual Return: Min(User's Total Monthly Spend × 0.015, Rs 2,000)
 
 
 CALCULATION PROCESS:
-Step 1: Identify User's Current Card
-Extract the specific credit card details from the database that matches the user's current card
+CALCULATION PROCESS:
+Step 1: Identify User's Current Card(s)
+Extract the specific credit card details from the database that matches the user's current card(s). If multiple cards are provided, analyze each card separately.
 
-Step 2: For Each Spending Category
+Step 2: For Each Card and Each Spending Category
 Get user's actual monthly spending amount from persona
-Apply current card's specific benefit for that category
+Apply each card's specific benefit for that category
 Calculate actual return using formulas above
 Apply caps and restrictions that limited actual returns
 
 Step 3: Calculate Total Current Return
-Sum all category returns + annual benefits actually utilized (divided by 12)
+Single Card: Sum all category returns + annual benefits actually utilized (divided by 12)
+Multiple Cards: Calculate total return for each card separately, then apply averaging logic:
+If any card has total return = Rs 0, exclude it from average calculation
+Take average of only cards with total return > Rs 0
+If all cards have total return = Rs 0, show Rs 0
+
 
 
 OUTPUT FORMAT:
 {
   "totalReturn": "[Total monthly return user actually earned]",
-  "returnBreakup": {
-        "MOVIE": "[Return amount or 0 if no spending/benefit]",
-        "SHOPPING": "[Calculated return based on spending and card benefits]",
-        "GROCERY": "[Calculated return based on spending and card benefits]",
-        "FOOD": "[Calculated return based on spending and card benefits]",
-        "DINING": "[Calculated return based on spending and card benefits]",
-        "FUEL": "[Return amount or 0 if no spending/benefit]",
-        "UPI": "[Calculated return - often 0 due to restrictions]",
-        "UTILITY": "[Return amount or 0 if no spending/benefit]",
-        "RAILWAY": "[Return amount or 0 if no spending/benefit]",
-        "others": "[Return from base rate on Others category + any other benefits like lounge access value]"
-      }
 }
 
 ## IMPORTANT NOTES:
@@ -688,7 +683,7 @@ OUTPUT FORMAT:
 6. Include annual benefits (like lounge access, etc) divided by 12 for monthly equivalent
 7. Clearly state any assumptions made in calculations
 
-## CRITICAL INSTRUCTION: Analyze the provided user persona against their CURRENT credit card only. Calculate the exact monthly returns the user actually earned based on their real spending pattern and their current card's reward structure.
+## CRITICAL INSTRUCTION: Analyze the provided user persona against their CURRENT credit card(s). If multiple cards provided, calculate returns for each card separately. For final totalReturn, take average of only cards with returns > 0 (exclude any cards with 0 returns from average calculation). Output only the total return value.
 ## CRITICAL INSTRUCTION: Strictly output only pure JSON without any additional text. Never use \`\`\`json\`\`\` code blocks or any markdown formatting for JSON responses
 
 
