@@ -249,17 +249,21 @@ export class CreditCardService {
                 {cardName:1,rewardSummary: 1, _id: 0},
             ).lean();
 
-            const currentEarningCard = await this.creditCardAnalysisModel.find(
-                {"cardName":{"$in":request.cardName}},
-                {cardName:1,rewardSummary: 1, _id: 0},
-            ).limit(50).lean();
+            let currentEarningCard = [];
+            if(request.cardName){
+                currentEarningCard = await this.creditCardAnalysisModel.find(
+                    {"cardName":{"$in":request.cardName}},
+                    {cardName:1,rewardSummary: 1, _id: 0},
+                ).limit(50).lean();
+            }
+
 
             const prompt = this.geminiService.getRecommendationPrompt(
                 JSON.stringify(userPersona),
                 JSON.stringify(availableCards),
             );
 
-            const cuurentEarningPompt = this.geminiService.getRecommendationPrompt(
+            const cuurentEarningPompt = this.geminiService.getRecommendationCurrentPrompt(
                 JSON.stringify(userPersona),
                 JSON.stringify(currentEarningCard),
             );
@@ -277,15 +281,16 @@ export class CreditCardService {
 
             const result = []
             let currentEarningAmount = 0;
-            if(currentEarning && currentEarning['topRecommendations']){
-                for(const item of currentEarning['topRecommendations']){
-                    if(!isNaN(Number(item['totalReturn']))){
-                        currentEarningAmount = currentEarningAmount + Number(item['totalReturn']);
-                    }
-                }
+            let count = 0;
+            if(currentEarning && currentEarning['totalReturn']){
+                currentEarningAmount =currentEarning['totalReturn']
+                count = currentEarningCard.length
+            }
+
+            if(count>0){
+                currentEarningAmount = Number(Number(currentEarningAmount/count).toFixed(2));
             }
             if(answer && answer['topRecommendations']){
-                currentEarningAmount = currentEarningAmount/(answer['topRecommendations'].length)
                 for(const item of answer['topRecommendations']){
                     let cardName = item['cardName'];
                     const availableCards = await this.creditCardAnalysisModel.findOne(
