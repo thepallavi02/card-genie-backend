@@ -246,7 +246,7 @@ export class CreditCardService {
             const availableCards = await this.creditCardAnalysisModel.find(
                 {"isActive":true},
                 {cardName:1,rewardSummary: 1, _id: 0},
-            ).limit(50).lean();
+            ).lean();
 
             const currentEarningCard = await this.creditCardAnalysisModel.find(
                 {"cardName":{"$in":request.cardName}},
@@ -262,10 +262,9 @@ export class CreditCardService {
                 JSON.stringify(userPersona),
                 JSON.stringify(currentEarningCard),
             );
-
             let [answer,currentEarning] = await Promise.all([
-                await this.geminiService.recommendationWithGroq(prompt),
-                await this.geminiService.recommendationWithGroq(cuurentEarningPompt),
+                this.geminiService.makeOpenAICall(prompt),
+                this.geminiService.makeOpenAICall(cuurentEarningPompt),
             ])
             const result = []
             let currentEarningAmount = 0;
@@ -287,7 +286,7 @@ export class CreditCardService {
                     item['rewardSummary'] = availableCards?.rewardSummary;
                     item['feeStructure'] = availableCards?.feeStructure;
                     item['benefits'] = availableCards?.benefits;
-                    item['currentReturn'] = Number(currentEarningAmount.toFixed(2));
+                    item['currentReturn'] = currentEarningAmount;
                     result.push(item);
 
                 }

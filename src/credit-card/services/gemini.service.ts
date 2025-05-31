@@ -7,6 +7,8 @@ import {
   ProcessingResult,
 } from '../interfaces/credit-card-analyzer.interface';
 import { Groq } from 'groq-sdk';
+import axios from 'axios';
+
 @Injectable()
 export class GeminiService {
   private readonly logger = new Logger(GeminiService.name);
@@ -291,163 +293,197 @@ Generate a JSON object with the following structure that captures both basic car
   }
 
   getRecommendationPrompt(user_persona, credit_cards_data): string {
-    return `You are an advanced credit card recommendation engine. Your task is to analyze user spending data and available credit card features to recommend the most beneficial credit card, maximizing the user's financial returns.
+    return `
 
-        USER PERSONA:
-        ${user_persona}
+# You are an advanced credit card recommendation engine. Your task is to analyze user spending data and available credit card features to recommend the most beneficial credit card, maximizing the user's financial returns.
 
-        AVAILABLE CREDIT CARDS DATABASE:
-        ${credit_cards_data}
-        
-        Task & Reasoning Process:
 
-        1.  Objective: For the given user persona, calculate the estimated maximum monthly financial return (in INR) from each of the provided credit cards based on their monthly spending profile.
-        2.  Calculation Methodology:
-                MOVIE:
-                    Below is how you calculate the value 
-                        - If BOGO: "BOGO, [Number] times per month, up to Rs [Amount] off per ticket."
-                        - If Percentage off: "[Percentage]% off, up to Rs [Amount] per month."
-                        - If fixed discount: "Rs [Amount] off per ticket, [Number] times per month."
-                SHOPPING:
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
-                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."
-                GROCERY:
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
-                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."    
-                FOOD:
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
-                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."
-                DINING:
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
-                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."
-                FUEL:
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No points on fuel."
-                        - Surcharge Waiver: "1% Surcharge waiver, capped at Rs [Amount] per month."
-                UPI:
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No points on UPI."
-                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."
-                UTILITY:
-                    Note: It should only consist of Electricity/Internet/Telephone Bills/Infocomm/Water Bills/Cooking Gas Bills/Cable TV Bills/Govt. Bills.
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No points on utility bills."
-                        - Cashback/Discount: "[Percentage]% cashback/discount, up to Rs [Amount] per month."    
-                RAILWAY (Train):
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No specific benefits."
-                        - Other Benefits: "[Description of specific railway benefits, e.g., lounge access at stations, if applicable]"
-                FLIGHT(Travel):
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No specific benefits."
-                        - Other Benefits: "[Description of specific flight benefits, e.g., lounge access at stations, if applicable]"  
-                HOTEL(Travel):
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent" OR "No specific benefits."
-                        - Other Benefits: "[Description of specific benefits]"        
-                Reward Point (Base Rate & Value):
-                    Below is how you calculate the value
-                        - Base Rate: "[X] Reward Points for every Rs [Y] spent (on general retail/non-excluded categories)."
-                        - Highest Redemption Value: "[1 RP = Rs Z]" (Specify type, e.g., "Flights/Hotels/Specific Brand Vouchers")
-                        - Other Redemption Value: "[1 RP = Rs Z]" (Specify type, e.g., "General Catalogue Products/Vouchers")
-                        - Cashback Redemption Value: "[1 RP = Rs Z]" (If convertible to statement credit/cashback)
-                Domestic Lounge:
-                    Below is how you calculate the value
-                        - Access: "[Number] access per [Quarter/Year]" OR "Unlimited access."
-                        - Guest Access: "Plus [Number] guest visits per [Quarter/Year]" (if applicable).
-                        - Estimated Value per Visit (for calculation): Rs 1,000 (Use this for calculation if card doesn't state value.)
-                International Lounge:
-                    Below is how you calculate the value
-                        - Access: "[Number] access per [Quarter/Year]" OR "Unlimited access."
-                        - Guest Access: "Plus [Number] guest visits per [Quarter/Year]" (if applicable).
-                        - Estimated Value per Visit (for calculation): Rs 2,500 (Use this for calculation if card doesn't state value.)
-                HOTEL:
-                    Below is how you calculate the value
-                        - Reward Point Earnings: "[X] Reward Points per Rs [Y] spent."
-                        - Discount/Free Nights: "[Percentage]% off" or "[Number] free nights/discounts through specific platform/partner."
-                GOLF:
-                    Below is how you calculate the value
-                        - Access: "[Number] complimentary rounds/lessons per [Month/Year]" OR "Unlimited access."
-                        - Estimated Value per Round (for calculation): Rs 5,000 (Use this for calculation if card doesn't state value.)
-                FOREX Markup (as a reward/benefit if 0%): "[Percentage]% (If 0% waiver, state 0%. Otherwise, state the standard markup for comparison.)"
-                CASHBACK (Direct):
-                    Below is how you calculate the value
-                        - "[Percentage]% direct cashback, up to Rs [Amount] per [Month/Statement Cycle]."
-                Smartbuy/Grab Deals/iShop/Bank-Specific Portal Usage (for accelerated rewards):
-                    Below is how you calculate the value
-                        - Travel (Flights/Trains): "Up to [X]X Reward Points" or "[Percentage]% discount" on [Specific Platform, e.g., Smartbuy, iShop].
-                        - Hotel Booking: "Up to [X]X Reward Points" or "[Percentage]% discount" on [Specific Platform, e.g., Smartbuy, iShop].
-                        - Shopping: "Up to [X]X Reward Points" or "[Percentage]% discount" on [Specific Platform, e.g., Smartbuy, iShop], or "Vouchers at [1 RP = Rs Z] via platform."
-                Other Quantifiable Rewards: [Add any other distinct reward categories found on the page, with quantifiable values.]
-                
-        3.  Output Format: 
-        NOTE: The output should be strictly in the below format:
+The USER PERSONA IS: 
+${user_persona}  
 
-            {{
-          "topRecommendations": [
-            {{
-              "rank": 1,
-                    "cardName": "HDFC Diners Club Black",
-                    "totalReturn": "In rupees",
-                    "currentReturn": "In rupees",
-                    "returnBreakup": {{
-                        "MOVIE": "In rupees",
-                        "SHOPPING": "In rupees",
-                        "GROCERY": "In rupees",
-                        "FOOD": "In rupees",
-                        "DINING": "In rupees",
-                        "FUEL": "In rupees",
-                        "UPI": "In rupees",
-                        "UTILITY": "In rupees",
-                        "RAILWAY": "In rupees",
-                        "others": "In rupees"
-                    }}
-                    }},
-                    {{
-                    "rank": 2,
-                    "cardName": "SBI Card PRIME",
-                    "totalReturn": "In rupees",
-                    "currentReturn": "In rupees",
-                    "returnBreakup": {{
-                        "MOVIE": "In rupees",
-                        "SHOPPING": "In rupees",
-                        "GROCERY": "In rupees",
-                        "FOOD": "In rupees",
-                        "DINING": "In rupees",
-                        "FUEL": "In rupees",
-                        "UPI": "In rupees",
-                        "UTILITY": "In rupees",
-                        "RAILWAY": "In rupees",
-                        "others": "In rupees"
-                    }}
-                    }},
-                    {{
-                    "rank": 3,
-                    "cardName": "ICICI Amazon Pay",
-                    "totalReturn": "In rupees",
-                    "currentReturn": "In rupees",
-                    "returnBreakup": {{
-                        "MOVIE": "In rupees",
-                        "SHOPPING": "In rupees",
-                        "GROCERY": "In rupees",
-                        "FOOD": "In rupees",
-                        "DINING": "In rupees",
-                        "FUEL": "In rupees",
-                        "UPI": "In rupees",
-                        "UTILITY": "In rupees",
-                        "RAILWAY": "In rupees",
-                        "others": "In rupees"
-                    }}
-                    }}
-                ]
-            }}
-        NOTE:- Strictly output only pure JSON without any additional text. Never use \`\`\`json\`\`\` code blocks or any markdown formatting for JSON responses
+## USER PERSONA FORMAT:
+The user persona will contain:
+category_breakdown: Actual spending amounts per category
+transaction_metrics: Overall spending statistics
+basic_features: User's credit profile
 
-        """`;
+AVAILABLE CREDIT CARDS DATABASE:
+${credit_cards_data}
+
+
+## CALCULATION METHODOLOGY:
+
+## CALCULATION METHODOLOGY WITH EXAMPLES:
+
+### MOVIE Category:
+**Card Benefit Examples & Calculations:**
+**BOGO**: "BOGO, 4 times per month, up to Rs 200 off per ticket"
+  - Calculation: If user spends Rs 1,200 on movies (assuming Rs 300/ticket), they get 4 tickets free
+  - Return: Min(Number of tickets bought, 4) × Rs 200 = Up to Rs 800
+**Percentage off**: "20% off, up to Rs 500 per month"
+  - Calculation: Min(Monthly Movie Spend × 0.20, Rs 500)
+  - Example: Rs 1,200 × 0.20 = Rs 240 (since < Rs 500 cap)
+**Fixed discount**: "Rs 150 off per ticket, 2 times per month"
+  - Calculation: Min(Number of movie transactions, 2) × Rs 150
+
+### SHOPPING Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "2 Reward Points per Rs 100 spent"
+  - Calculation: (Monthly Shopping Spend ÷ 100) × 2 × Redemption Value
+  - Example: Rs 23,182.71 ÷ 100 × 2 × Rs 1 = Rs 463.65
+**Cashback**: "5% cashback, up to Rs 1,000 per month"
+  - Calculation: Min(Monthly Shopping Spend × 0.05, Rs 1,000)
+  - Example: Min(Rs 23,182.71 × 0.05, Rs 1,000) = Rs 1,000 (capped)
+
+### GROCERY Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "3 Reward Points per Rs 100 spent"
+  - Calculation: (Monthly Grocery Spend ÷ 100) × 3 × Redemption Value
+  - Example: Rs 2,999 ÷ 100 × 3 × Rs 1 = Rs 89.97
+**Cashback**: "2% cashback, up to Rs 300 per month"
+  - Calculation: Min(Monthly Grocery Spend × 0.02, Rs 300)
+  - Example: Min(Rs 2,999 × 0.02, Rs 300) = Rs 59.98
+
+### FOOD Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "4 Reward Points per Rs 100 spent"
+  - Calculation: (Monthly Food Spend ÷ 100) × 4 × Redemption Value
+  - Example: Rs 3,928.21 ÷ 100 × 4 × Rs 1 = Rs 157.13
+**Cashback**: "10% cashback, up to Rs 400 per month"
+  - Calculation: Min(Monthly Food Spend × 0.10, Rs 400)
+  - Example: Min(Rs 3,928.21 × 0.10, Rs 400) = Rs 392.82
+
+### DINING Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "5 Reward Points per Rs 100 spent"
+  - Calculation: (Monthly Dining Spend ÷ 100) × 5 × Redemption Value
+  - Example: Rs 256 ÷ 100 × 5 × Rs 1 = Rs 12.80
+**Cashback**: "15% cashback, up to Rs 500 per month"
+  - Calculation: Min(Monthly Dining Spend × 0.15, Rs 500)
+  - Example: Min(Rs 256 × 0.15, Rs 500) = Rs 38.40
+
+### FUEL Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "2 Reward Points per Rs 100 spent"
+  - Calculation: (Monthly Fuel Spend ÷ 100) × 2 × Redemption Value
+**Surcharge Waiver**: "1% Surcharge waiver, capped at Rs 200 per month"
+  - Calculation: Min(Monthly Fuel Spend × 0.01, Rs 200)
+**No Points**: "No points on fuel" = Rs 0
+
+### UPI Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "1 Reward Point per Rs 100 spent"
+  - Calculation: (Monthly UPI Spend ÷ 100) × 1 × Redemption Value
+  - Example: Rs 297 ÷ 100 × 1 × Rs 1 = Rs 2.97
+**Cashback**: "1% cashback, up to Rs 100 per month"
+  - Calculation: Min(Monthly UPI Spend × 0.01, Rs 100)
+**No Points**: "No points on UPI" = Rs 0
+
+### UTILITY Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "1 Reward Point per Rs 100 spent"
+  - Calculation: (Monthly Utility Spend ÷ 100) × 1 × Redemption Value
+**No Points**: "No points on utility bills" = Rs 0
+
+### RAILWAY (Train) Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "2 Reward Points per Rs 100 spent"
+  - Calculation: (Monthly Railway Spend ÷ 100) × 2 × Redemption Value
+**No Benefits**: "No specific benefits" = Rs 0
+
+### FLIGHT (Travel) Category:
+**Card Benefit Examples & Calculations:**
+**Reward Points**: "3 Reward Points per Rs 100 spent"
+  - Calculation: (Monthly Flight Spend ÷ 100) × 3 × Redemption Value
+**No Benefits**: "No specific benefits" = Rs 0
+
+### Base Reward Points:
+**Card Benefit Examples & Calculations:**
+**Base Rate**: "1 Reward Point for every Rs 100 spent"
+  - Applied to: Categories without specific benefits + Others category
+  - Calculation: (Spend in non-specific categories ÷ 100) × 1 × Redemption Value
+**Redemption Values**: Use highest redemption value available for calculations
+
+### Domestic Lounge:
+**Card Benefit Examples & Calculations:**
+**Access**: "4 access per quarter" = 16 visits per year ÷ 12 = Rs 1,333.33 per month
+**Calculation**: (Annual visits ÷ 12) × Rs 1,000 per visit
+**Unlimited access**: Estimate 2 visits per month = Rs 2,000 per month
+
+### International Lounge:
+**Card Benefit Examples & Calculations:**
+**Access**: "2 access per year" = Rs 416.67 per month
+**Calculation**: (Annual visits ÷ 12) × Rs 2,500 per visit
+**Guest Access**: "Plus 1 guest visit per year" = Additional Rs 208.33 per month
+
+### GOLF:
+**Card Benefit Examples & Calculations:**
+**Access**: "1 complimentary round per month" = Rs 5,000 per month
+**Access**: "4 rounds per year" = Rs 1,666.67 per month
+**Calculation**: (Annual rounds ÷ 12) × Rs 5,000 per round
+
+### Direct Cashback:
+**Card Benefit Examples & Calculations:**
+**Direct Cashback**: "1.5% direct cashback, up to Rs 2,000 per month"
+  - Calculation: Min(Total Monthly Spend × 0.015, Rs 2,000)
+
+## CALCULATION PROCESS:
+
+### Step 1: For Each Credit Card in Database
+Extract all reward structures from rewardSummary array
+
+### Step 2: For Each Spending Category
+Get user's monthly spending amount from persona
+Apply card's specific benefit for that category
+Calculate return using formulas above
+Apply caps and restrictions
+
+### Step 3: Calculate Total Return
+Sum all category returns + annual benefits (divided by 12)
+
+### Step 4: Rank Cards
+Sort by total monthly return (highest to lowest)
+
+## OUTPUT FORMAT:
+json
+{
+  "topRecommendations": [
+    {
+      "rank": 1,
+      "cardName": "[Exact card name from database]",
+      "totalReturn": "[Total return in Rs]",
+      "returnBreakup": {
+        "MOVIE": "[Return amount or 0 if no spending/benefit]",
+        "SHOPPING": "[Calculated return based on spending and card benefits]",
+        "GROCERY": "[Calculated return based on spending and card benefits]",
+        "FOOD": "[Calculated return based on spending and card benefits]",
+        "DINING": "[Calculated return based on spending and card benefits]",
+        "FUEL": "[Return amount or 0 if no spending/benefit]",
+        "UPI": "[Calculated return - often 0 due to restrictions]",
+        "UTILITY": "[Return amount or 0 if no spending/benefit]",
+        "RAILWAY": "[Return amount or 0 if no spending/benefit]",
+        "others": "[Return from base rate on Others category + any other benefits like lounge access value]"
+      },
+      "calculationNotes": "[Explain key assumptions, caps applied, etc.]"
+    }
+  ]
+}
+
+## IMPORTANT NOTES:
+1. Use EXACT spending amounts from user persona
+2. Apply all caps and restrictions mentioned in card benefits
+3. The return benefit should strictly be calculated for all the categories present in the user persona.
+4. For categories with no user spending, return should be 0
+5. For "Others" category, apply base reward rate or percentage discount only
+6. Include annual benefits (like lounge access, etc) divided by 12 for monthly equivalent
+7. Clearly state any assumptions made in calculations
+
+## CRITICAL INSTRUCTION: Analyze the provided user persona against EACH credit card in the database. Calculate exact monthly returns using the user's specific spending amounts and each card's reward structure. Rank cards by total return value.
+## CRITICAL INSTRUCTION: Strictly output only pure JSON without any additional text. Never use \`\`\`json\`\`\` code blocks or any markdown formatting for JSON responses
+
+`;
+
+
   }
 
   async recommendationWithGroq(prompt: string): Promise<any> {
@@ -512,6 +548,39 @@ Generate a JSON object with the following structure that captures both basic car
       return parsedResponse;
     } catch (error) {
       return null;
+    }
+  }
+
+  async makeOpenAICall(prompt: string): Promise<any> {
+    try {
+      this.logger.log('Making OpenAI API call');
+
+      const response = await axios({
+        method: 'post',
+        url: 'https://api.openai.com/v1/chat/completions',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
+        },
+        data: {
+          model: 'gpt-4.1-2025-04-14',
+          messages: [
+            {
+              role: 'user',
+              content: prompt
+            }
+          ]
+        }
+      });
+
+      this.logger.log('Successfully received response from OpenAI');
+      if(response.data.choices.length > 0) {
+        return JSON.parse(response.data.choices[0].message.content)
+      }
+      return response.data;
+    } catch (error) {
+      this.logger.error(`OpenAI API call failed: ${error.message}`);
+      throw new Error(`OpenAI API call failed: ${error.message}`);
     }
   }
 }
